@@ -1,0 +1,35 @@
+# File: params.yaml
+# DVC watches this file. If anything here changes → dvc repro detects it.
+# Airflow DAG also reads this via config_loader.py
+
+data:
+  dataset_handle: "aishikai/asl-alphabets"
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  dvc_store_dir: "/media/neer/1E9C598B9C595DF92/Mtech/sem_2/MLops/dvc-store"
+  train_csv: "Training_set.csv"
+  
+split:
+  train_ratio: 0.70
+  val_ratio: 0.15
+  # test = 1 - train - val = 0.15 (computed automatically)
+  random_seed: 42
+
+preprocessing:
+  image_size: 224
+  normalize_mean: [0.485, 0.456, 0.406]
+  normalize_std: [0.229, 0.224, 0.225]
+  augmentations:
+    random_rotation_degrees: 15
+    horizontal_flip: true
+    color_jitter_brightness: 0.3
+
+validation:
+  min_resolution: 50
+  max_fail_rate: 0.05          # fail DAG if >5% images are corrupt/invalid
+
+email:
+  alert_address: "patelneer403@gmail.com"   # same as ALERT_EMAIL in .env
+
+pipeline:
+  force_rerun: false           # set true to force even if data unchanged
