@@ -1,0 +1,4 @@
+[core]
+    remote = localstore
+['remote "localstore"']
+    url = /media/neer/1E9C598B9C595DF92/Mtech/sem_2/MLops/dvc-store
