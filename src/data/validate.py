@@ -6,7 +6,7 @@ from PIL import Image
 
 logger = logging.getLogger(__name__)
 
-VALID_LABELS = set("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+VALID_LABELS = set(list("ABCDEFGHIJKLMNOPQRSTUVWXYZ") + ["DEL", "NOTHING", "SPACE"])
 MIN_RESOLUTION = (50, 50)
 
 
@@ -54,7 +54,8 @@ def validate_dataset(dataset_path: str, train_csv_path: str) -> dict:
 
     for _, row in df.iterrows():
         filename = str(row["filename"]).strip()
-        label = str(row["label"]).strip().upper()
+        # label = str(row["label"]).strip().upper()
+        label = str(row["label"]).strip().upper().replace(" ", "")
         img_path = os.path.join(image_root, filename)
 
         error = None
