@@ -1,0 +1,18 @@
+# File: config/pipeline_config.yaml
+# Non-DVC settings — Airflow behavior, paths inside container
+
+airflow:
+  dag_id: "asl_data_ingestion"
+  retries: 1
+  retry_delay_minutes: 2
+
+paths:
+  # Paths as seen INSIDE the Airflow Docker container
+  raw_dir: "/opt/airflow/data/raw"
+  processed_dir: "/opt/airflow/data/processed"
+  params_file: "/opt/airflow/params.yaml"
+  dvc_marker_file: "/opt/airflow/data/.dvc_last_run.json"
+  baseline_stats_file: "/opt/airflow/data/baseline_stats.json"
+
+logging:
+  pipeline_log: "/opt/airflow/logs/pipeline.log"

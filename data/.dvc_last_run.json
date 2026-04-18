@@ -1,0 +1,10 @@
+{
+  "params_hash": "72bed4251c3726b86d0552bbe391f354",
+  "last_run_utc": "2026-04-18T18:32:34.519641",
+  "dataset_handle": "aishikai/asl-alphabets",
+  "dvc_bin_used": "/home/airflow/.local/bin/dvc",
+  "split_ratios": {
+    "train": 0.7,
+    "val": 0.15
+  }
+}

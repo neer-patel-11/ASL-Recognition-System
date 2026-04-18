@@ -3,4 +3,5 @@ archive/
 .env
 logs/*
 dags/__pycache__/*
-data/*
+src/data/__pycache__/
+data/baseline_stats.json

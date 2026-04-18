@@ -27,6 +27,9 @@ x-airflow-common: &airflow-common
     - ./logs:/opt/airflow/logs
     - ./src:/opt/airflow/src
     - ./data:/opt/airflow/data
+    - ./config:/opt/airflow/config
+    - ./params.yaml:/opt/airflow/params.yaml
+
   depends_on:
     postgres:
       condition: service_healthy
@@ -51,7 +54,7 @@ services:
     command:
       - -c
       - |
-        pip install kagglehub pandas Pillow scikit-learn && \
+        pip install --quiet --no-cache-dir kagglehub pandas Pillow scikit-learn numpy pyyaml dvc && \
         airflow db migrate && \
         airflow users create \
           --username admin \
@@ -78,7 +81,7 @@ services:
   airflow-scheduler:
     <<: *airflow-common
     command: >
-      bash -c "pip install kagglehub pandas Pillow scikit-learn --quiet && airflow scheduler"
+      bash -c "pip install kagglehub pandas Pillow scikit-learn numpy pyyaml dvc --quiet && airflow scheduler"
 
     restart: always
 
