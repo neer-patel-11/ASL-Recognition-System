@@ -5,3 +5,5 @@ logs/*
 dags/__pycache__/*
 src/data/__pycache__/
 data/baseline_stats.json
+temp.py
+src/features/__pycache__/

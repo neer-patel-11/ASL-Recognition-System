@@ -1,0 +1,18 @@
+# File: dvc.yaml
+stages:
+  features:
+    cmd: python src/features/run_feature_check.py
+    deps:
+      - src/features/landmarks.py
+      - src/features/pixels.py
+      - src/features/bg_remove.py
+      - src/features/run_feature_check.py
+      - params.yaml
+    params:
+      - params.yaml:
+          - preprocessing.image_size
+          - preprocessing.normalize_mean
+          - preprocessing.normalize_std
+          - preprocessing.augmentations
+    outs:
+      - data/feature_check_report.json
