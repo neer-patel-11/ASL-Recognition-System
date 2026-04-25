@@ -9,10 +9,6 @@ logger = logging.getLogger(__name__)
 
 
 def compute_baseline(processed_dir: str = "data/processed/train") -> dict:
-    """
-    Compute per-class pixel mean, variance, and histogram.
-    Saves to data/baseline_stats.json for drift detection later.
-    """
     stats = {}
     all_means, all_vars = [], []
 
@@ -28,7 +24,7 @@ def compute_baseline(processed_dir: str = "data/processed/train") -> dict:
             if not fname.lower().endswith((".jpg", ".jpeg", ".png")):
                 continue
             try:
-                img = Image.open(os.path.join(label_dir, fname)).convert("RGB")
+                img = Image.open(os.path.join(label_dir, fname)).convert("L")  # grayscale
                 img = img.resize((224, 224))
                 arr = np.array(img).flatten().astype(np.float32) / 255.0
                 pixel_values.append(arr)
@@ -66,7 +62,3 @@ def compute_baseline(processed_dir: str = "data/processed/train") -> dict:
 
     logger.info(f"Baseline stats saved to {out_path}")
     return stats
-
-
-if __name__ == "__main__":
-    compute_baseline()

@@ -1,12 +1,11 @@
 # File: src/data/validate.py
 import os
 import logging
-import pandas as pd
 from PIL import Image
 
 logger = logging.getLogger(__name__)
 
-VALID_LABELS = set(list("ABCDEFGHIJKLMNOPQRSTUVWXYZ") + ["DEL", "NOTHING", "SPACE"])
+VALID_LABELS = set(list("ABCDEFGHIJKLMNOPQRSTUVWXYZ") + ["NIL"])
 MIN_RESOLUTION = (50, 50)
 
 
@@ -14,24 +13,26 @@ class DataValidationError(Exception):
     pass
 
 
-def validate_dataset(dataset_path: str, train_csv_path: str) -> dict:
+def _find_image_root(base_path: str) -> str:
     """
-    Validate all images listed in train.csv.
-    Returns validation stats dict.
+    Walk base_path to find the folder that contains A-Z + NIL subfolders.
+    Handles cases where kagglehub downloads into a nested version folder.
     """
-    df = pd.read_csv(train_csv_path)
+    for root, dirs, _ in os.walk(base_path):
+        letter_count = sum(1 for d in dirs if len(d.upper()) == 1 and d.upper().isalpha())
+        if letter_count >= 20:
+            return root
+    return base_path  # fallback
 
-    # Normalize column names (handle different capitalizations)
-    df.columns = [c.strip().lower() for c in df.columns]
 
-    # Expected: 'filename' and 'label' columns
-    if "filename" not in df.columns or "label" not in df.columns:
-        raise DataValidationError(
-            f"train.csv must have 'filename' and 'label' columns. Got: {list(df.columns)}"
-        )
-
+def validate_dataset(dataset_path: str, train_csv_path: str = None) -> dict:
+    """
+    Validate all images in folder-based dataset.
+    dataset_path: path returned by kagglehub (may be a version folder).
+    train_csv_path: ignored — kept for interface compatibility.
+    """
     results = {
-        "total": len(df),
+        "total": 0,
         "passed": 0,
         "failed": 0,
         "errors": [],
@@ -41,59 +42,52 @@ def validate_dataset(dataset_path: str, train_csv_path: str) -> dict:
         "missing_files": [],
     }
 
-    # Find image root directory
-    image_root = None
-    for root, dirs, _ in os.walk(dataset_path):
-        if "train" in dirs:
-            image_root = os.path.join(root, "train")
-            break
-    if image_root is None:
-        image_root = dataset_path  # fallback
+    if not os.path.isdir(dataset_path):
+        raise DataValidationError(f"Dataset path not found: {dataset_path}")
 
-    seen_files = set()
+    image_root = _find_image_root(dataset_path)
+    logger.info(f"Image root resolved to: {image_root}")
 
-    for _, row in df.iterrows():
-        filename = str(row["filename"]).strip()
-        # label = str(row["label"]).strip().upper()
-        label = str(row["label"]).strip().upper().replace(" ", "")
-        img_path = os.path.join(image_root, filename)
+    for label_folder in sorted(os.listdir(image_root)):
+        label_dir = os.path.join(image_root, label_folder)
+        if not os.path.isdir(label_dir):
+            continue
 
-        error = None
+        label = label_folder.strip().upper()
 
-        # Check 1: duplicate
-        if filename in seen_files:
-            error = f"Duplicate file: {filename}"
-        else:
-            seen_files.add(filename)
+        for fname in os.listdir(label_dir):
+            if not fname.lower().endswith((".jpg", ".jpeg", ".png")):
+                continue
 
-        # Check 2: file exists
-        if not os.path.exists(img_path):
-            error = f"Missing file: {img_path}"
-            results["missing_files"].append(filename)
+            img_path = os.path.join(label_dir, fname)
+            results["total"] += 1
+            error = None
 
-        # Check 3: valid label
-        elif label not in VALID_LABELS:
-            error = f"Invalid label '{label}' for {filename}"
-            results["invalid_labels"].append(filename)
+            # Check 1: valid label
+            if label not in VALID_LABELS:
+                error = f"Invalid label '{label}' for {fname}"
+                results["invalid_labels"].append(fname)
 
-        # Check 4: image not corrupt + min resolution
-        else:
-            try:
-                with Image.open(img_path) as img:
-                    w, h = img.size
-                    if w < MIN_RESOLUTION[0] or h < MIN_RESOLUTION[1]:
-                        error = f"Resolution too small {w}x{h}: {filename}"
-            except Exception as e:
-                error = f"Corrupt image {filename}: {e}"
-                results["corrupt_images"].append(filename)
+            # Check 2: image not corrupt + min resolution + grayscale mode
+            else:
+                try:
+                    with Image.open(img_path) as img:
+                        w, h = img.size
+                        if w < MIN_RESOLUTION[0] or h < MIN_RESOLUTION[1]:
+                            error = f"Resolution too small {w}x{h}: {img_path}"
+                        elif img.mode not in ("L", "LA"):
+                            logger.warning(f"Unexpected mode {img.mode}: {img_path}")
+                except Exception as e:
+                    error = f"Corrupt image {img_path}: {e}"
+                    results["corrupt_images"].append(fname)
 
-        if error:
-            results["failed"] += 1
-            results["errors"].append(error)
-            logger.warning(error)
-        else:
-            results["passed"] += 1
-            results["class_counts"][label] = results["class_counts"].get(label, 0) + 1
+            if error:
+                results["failed"] += 1
+                results["errors"].append(error)
+                logger.warning(error)
+            else:
+                results["passed"] += 1
+                results["class_counts"][label] = results["class_counts"].get(label, 0) + 1
 
     logger.info(
         f"Validation complete: {results['passed']} passed, {results['failed']} failed"
@@ -103,7 +97,6 @@ def validate_dataset(dataset_path: str, train_csv_path: str) -> dict:
 
 if __name__ == "__main__":
     import sys
-    path = sys.argv[1] if len(sys.argv) > 1 else "data/raw"
-    csv = sys.argv[2] if len(sys.argv) > 2 else "data/raw/train.csv"
-    r = validate_dataset(path, csv)
+    path = sys.argv[1] if len(sys.argv) > 1 else "data/raw/generated images"
+    r = validate_dataset(path)
     print(r)

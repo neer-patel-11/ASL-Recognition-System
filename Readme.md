@@ -1,7 +1,9 @@
 
 
-https://www.kaggle.com/datasets/aishikai/asl-alphabets
+<!-- https://www.kaggle.com/datasets/aishikai/asl-alphabets -->
 
+
+https://www.kaggle.com/datasets/mayank0bhardwaj/alphabets
 
 asl-recognition/
 ├── dags/
@@ -102,6 +104,12 @@ git commit -m "dvc: track raw and processed data after first pipeline run"
 
 
 Docker up and runing 
+
+sudo chown -R 50000:50000 logs
+chmod -R 755 logs
+
+sudo chown -R 50000:50000 data
+chmod -R 755 data
 
 
 docker compose -f docker-compose.airflow.yml up airflow-init

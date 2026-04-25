@@ -1,7 +1,7 @@
 {
-  "params_hash": "72bed4251c3726b86d0552bbe391f354",
-  "last_run_utc": "2026-04-18T18:32:34.519641",
-  "dataset_handle": "aishikai/asl-alphabets",
+  "params_hash": "f325fb5899217774058e58c5be889c36",
+  "last_run_utc": "2026-04-25T17:41:56.880981",
+  "dataset_handle": "mayank0bhardwaj/alphabets",
   "dvc_bin_used": "/home/airflow/.local/bin/dvc",
   "split_ratios": {
     "train": 0.7,

@@ -5,8 +5,8 @@ stages:
     deps:
     - path: params.yaml
       hash: md5
-      md5: 72bed4251c3726b86d0552bbe391f354
-      size: 984
+      md5: f325fb5899217774058e58c5be889c36
+      size: 924
     - path: src/features/bg_remove.py
       hash: md5
       md5: 734b6df73b4adc1e70bf0e4049e60163
@@ -31,15 +31,11 @@ stages:
           color_jitter_brightness: 0.3
         preprocessing.image_size: 224
         preprocessing.normalize_mean:
-        - 0.485
-        - 0.456
-        - 0.406
+        - 0.5
         preprocessing.normalize_std:
-        - 0.229
-        - 0.224
-        - 0.225
+        - 0.5
     outs:
     - path: data/feature_check_report.json
       hash: md5
-      md5: 4409528efe5c68fa0ae7e0d0c7c7b553
-      size: 5777
+      md5: e0b2d295a3f56ef75fa79384b954dad4
+      size: 4810

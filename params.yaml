@@ -3,11 +3,11 @@
 # Airflow DAG also reads this via config_loader.py
 
 data:
-  dataset_handle: "aishikai/asl-alphabets"
+  dataset_handle: "mayank0bhardwaj/alphabets"
   raw_dir: "data/raw"
   processed_dir: "data/processed"
   dvc_store_dir: "/media/neer/1E9C598B9C595DF92/Mtech/sem_2/MLops/dvc-store"
-  train_csv: "Training_set.csv"
+
   
 split:
   train_ratio: 0.70
@@ -17,8 +17,8 @@ split:
 
 preprocessing:
   image_size: 224
-  normalize_mean: [0.485, 0.456, 0.406]
-  normalize_std: [0.229, 0.224, 0.225]
+  normalize_mean: [0.5]
+  normalize_std: [0.5]
   augmentations:
     random_rotation_degrees: 15
     horizontal_flip: true
