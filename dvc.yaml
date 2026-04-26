@@ -1,4 +1,3 @@
-# File: dvc.yaml
 stages:
   features:
     cmd: python src/features/run_feature_check.py
@@ -7,7 +6,7 @@ stages:
       - src/features/pixels.py
       - src/features/bg_remove.py
       - src/features/run_feature_check.py
-      - params.yaml
+      - data/processed/
     params:
       - params.yaml:
           - preprocessing.image_size
@@ -16,3 +15,63 @@ stages:
           - preprocessing.augmentations
     outs:
       - data/feature_check_report.json
+
+  train_traditional:
+    cmd: python src/train.py --model traditional_ml
+    deps:
+      - src/train.py
+      - src/models/traditional_ml.py
+      - src/models/dataset.py
+      - src/features/landmarks.py
+      - src/evaluate.py
+      - data/processed/
+    params:
+      - params.yaml:
+          - models.traditional
+          - training.output_dir
+    outs:
+      - models/traditional/traditional_model.pkl
+    metrics:
+      - models/traditional/eval.json
+
+  train_mlp:
+    cmd: python src/train.py --model mlp
+    deps:
+      - src/train.py
+      - src/models/landmark_mlp.py
+      - src/models/dataset.py
+      - src/features/landmarks.py
+      - src/utils/training_utils.py
+      - src/evaluate.py
+      - data/processed/
+    params:
+      - params.yaml:
+          - models.mlp
+          - training
+    outs:
+      - models/mlp/mlp_best.pth
+    metrics:
+      - models/mlp/eval.json
+
+  train_cnn:
+    cmd: python src/train.py --model cnn
+    deps:
+      - src/train.py
+      - src/models/tiny_cnn.py
+      - src/models/dataset.py
+      - src/features/pixels.py
+      - src/utils/training_utils.py
+      - src/evaluate.py
+      - data/processed/
+    params:
+      - params.yaml:
+          - models.cnn
+          - training
+          - preprocessing.image_size
+          - preprocessing.normalize_mean
+          - preprocessing.normalize_std
+          - preprocessing.augmentations
+    outs:
+      - models/cnn/cnn_best.pth
+    metrics:
+      - models/cnn/eval.json

@@ -1,7 +1,7 @@
 # File: src/data/download.py
 import os, time, logging
 import kagglehub
-from data.config_loader import load_params
+from config_loader import load_params
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

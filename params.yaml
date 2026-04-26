@@ -1,6 +1,7 @@
 # File: params.yaml
-# DVC watches this file. If anything here changes → dvc repro detects it.
-# Airflow DAG also reads this via config_loader.py
+# DVC watches this file — any change here triggers dvc repro.
+# Airflow DAG also reads this via config_loader.py.
+# ─────────────────────────────────────────────────────────────
 
 data:
   dataset_handle: "mayank0bhardwaj/alphabets"
@@ -8,17 +9,16 @@ data:
   processed_dir: "data/processed"
   dvc_store_dir: "/media/neer/1E9C598B9C595DF92/Mtech/sem_2/MLops/dvc-store"
 
-  
 split:
   train_ratio: 0.70
   val_ratio: 0.15
-  # test = 1 - train - val = 0.15 (computed automatically)
+  # test = 1 - train - val = 0.15
   random_seed: 42
 
 preprocessing:
   image_size: 224
-  normalize_mean: [0.5]
-  normalize_std: [0.5]
+  normalize_mean: [0.5, 0.5, 0.5]
+  normalize_std:  [0.5, 0.5, 0.5]
   augmentations:
     random_rotation_degrees: 15
     horizontal_flip: true
@@ -26,10 +26,77 @@ preprocessing:
 
 validation:
   min_resolution: 50
-  max_fail_rate: 0.05          # fail DAG if >5% images are corrupt/invalid
+  max_fail_rate: 0.05
 
 email:
-  alert_address: "patelneer403@gmail.com"   # same as ALERT_EMAIL in .env
+  alert_address: "patelneer403@gmail.com"
 
 pipeline:
-  force_rerun: false           # set true to force even if data unchanged
+  force_rerun: false
+
+# ─────────────────────────────────────────────────────────────
+#  TRAINING (shared across all deep learning models)
+# ─────────────────────────────────────────────────────────────
+training:
+  output_dir: "models"
+  epochs: 20
+  batch_size: 64
+  optimizer: adam           # adam | adamw | sgd
+  lr: 0.001
+  weight_decay: 1.0e-4
+  momentum: 0.9             # only for sgd
+  scheduler: cosine         # cosine | step | none
+  step_size: 10             # only for StepLR
+  gamma: 0.1                # only for StepLR
+  patience: 10              # early stopping patience
+  min_delta: 1.0e-4         # early stopping min improvement
+  label_smoothing: 0.1
+
+# ─────────────────────────────────────────────────────────────
+#  MODELS
+#  Change `active` to switch which model gets trained by default.
+#  Override on CLI: python src/train.py --model cnn
+# ─────────────────────────────────────────────────────────────
+models:
+  active: traditional_ml               # traditional_ml | mlp | cnn
+
+  # ── 1. Traditional ML ─────────────────────────────────────
+  # Input: 63-dim MediaPipe landmark vector
+  # Switch algorithm here — no code changes needed
+  traditional:
+    algorithm: knn   # random_forest | svm | knn
+
+    random_forest:
+      n_estimators: 200
+      max_depth: null          # null = unlimited
+      min_samples_split: 2
+      n_jobs: -1
+      random_state: 42
+
+    svm:
+      C: 10.0
+      kernel: rbf              # rbf | linear | poly
+      gamma: scale             # scale | auto | float
+      probability: true        # needed for predict_proba
+
+    knn:
+      n_neighbors: 7
+      weights: distance        # uniform | distance
+      metric: euclidean
+
+  # ── 2. Simple NN / MLP ────────────────────────────────────
+  # Input: 63-dim MediaPipe landmark vector
+  # Add/remove entries in hidden_dims to change depth
+  mlp:
+    hidden_dims: [256, 128]
+    dropout: 0.4
+    use_batch_norm: true
+
+  # ── 3. Custom CNN (no pretrained weights) ─────────────────
+  # Input: (C, 224, 224) pixel tensor
+  # Add/remove entries in channels to change depth
+  cnn:
+    channels: [16, 32, 64, 96]
+    fc_dim: 128
+    dropout: 0.3
+    input_channels: 3        # 3 for RGB, 1 for grayscale

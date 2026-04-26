@@ -3,10 +3,11 @@ stages:
   features:
     cmd: python src/features/run_feature_check.py
     deps:
-    - path: params.yaml
+    - path: data/processed/
       hash: md5
-      md5: f325fb5899217774058e58c5be889c36
-      size: 924
+      md5: 13ef9fefb241f59a554c94b6b063228f.dir
+      size: 27117352
+      nfiles: 4818
     - path: src/features/bg_remove.py
       hash: md5
       md5: 734b6df73b4adc1e70bf0e4049e60163
@@ -32,10 +33,234 @@ stages:
         preprocessing.image_size: 224
         preprocessing.normalize_mean:
         - 0.5
+        - 0.5
+        - 0.5
         preprocessing.normalize_std:
+        - 0.5
+        - 0.5
         - 0.5
     outs:
     - path: data/feature_check_report.json
       hash: md5
-      md5: e0b2d295a3f56ef75fa79384b954dad4
-      size: 4810
+      md5: 2a7da433a57bb3b66835e58a1aaa70a0
+      size: 4809
+  ingest:
+    cmd: python src/data/download.py
+    deps:
+    - path: src/data/config_loader.py
+      hash: md5
+      md5: 8f7f2021288ea33f964c1d37ee46994b
+      size: 1478
+    - path: src/data/download.py
+      hash: md5
+      md5: 35897e2d945d39521c0ae64017c24f84
+      size: 1462
+    params:
+      params.yaml:
+        data.dataset_handle: mayank0bhardwaj/alphabets
+        data.raw_dir: data/raw
+    outs:
+    - path: data/raw/
+      hash: md5
+      md5: d751713988987e9331980363e24189ce.dir
+      size: 0
+      nfiles: 0
+  train_traditional:
+    cmd: python src/train.py --model traditional_ml
+    deps:
+    - path: data/processed/
+      hash: md5
+      md5: 13ef9fefb241f59a554c94b6b063228f.dir
+      size: 27117352
+      nfiles: 4818
+    - path: src/evaluate.py
+      hash: md5
+      md5: cdc0070b1ef9aaf0a536fdfce8845632
+      size: 3160
+    - path: src/features/landmarks.py
+      hash: md5
+      md5: 5866a5c3f22b4b04b9ea711d6676124f
+      size: 5563
+    - path: src/models/dataset.py
+      hash: md5
+      md5: cb3806a2c373ed51610f812941fc7f1d
+      size: 6966
+    - path: src/models/traditional_ml.py
+      hash: md5
+      md5: ed57506a2d84b42748a85317b5cd4cd0
+      size: 4409
+    - path: src/train.py
+      hash: md5
+      md5: 10d22ff1b756fd3273738dca5243a789
+      size: 22885
+    params:
+      params.yaml:
+        models.traditional:
+          algorithm: knn
+          random_forest:
+            n_estimators: 200
+            max_depth:
+            min_samples_split: 2
+            n_jobs: -1
+            random_state: 42
+          svm:
+            C: 10.0
+            kernel: rbf
+            gamma: scale
+            probability: true
+          knn:
+            n_neighbors: 7
+            weights: distance
+            metric: euclidean
+        training.output_dir: models
+    outs:
+    - path: models/traditional/eval.json
+      hash: md5
+      md5: f7daca8ce03e0edc2dfa93be3f3ca056
+      size: 46
+    - path: models/traditional/traditional_model.pkl
+      hash: md5
+      md5: d7474d2b63dd5fb84a48871b77a85cd9
+      size: 877546
+  train_mlp:
+    cmd: python src/train.py --model mlp
+    deps:
+    - path: data/processed/
+      hash: md5
+      md5: 13ef9fefb241f59a554c94b6b063228f.dir
+      size: 27117352
+      nfiles: 4818
+    - path: src/evaluate.py
+      hash: md5
+      md5: cdc0070b1ef9aaf0a536fdfce8845632
+      size: 3160
+    - path: src/features/landmarks.py
+      hash: md5
+      md5: 5866a5c3f22b4b04b9ea711d6676124f
+      size: 5563
+    - path: src/models/dataset.py
+      hash: md5
+      md5: cb3806a2c373ed51610f812941fc7f1d
+      size: 6966
+    - path: src/models/landmark_mlp.py
+      hash: md5
+      md5: 0f2128fab71537e671888864dd35ee84
+      size: 2405
+    - path: src/train.py
+      hash: md5
+      md5: 10d22ff1b756fd3273738dca5243a789
+      size: 22885
+    - path: src/utils/training_utils.py
+      hash: md5
+      md5: fcdf07e14fa025a9ae3b7b9e5f3fb17b
+      size: 5775
+    params:
+      params.yaml:
+        models.mlp:
+          hidden_dims:
+          - 256
+          - 128
+          dropout: 0.4
+          use_batch_norm: true
+        training:
+          output_dir: models
+          epochs: 20
+          batch_size: 64
+          optimizer: adam
+          lr: 0.001
+          weight_decay: 0.0001
+          momentum: 0.9
+          scheduler: cosine
+          step_size: 10
+          gamma: 0.1
+          patience: 10
+          min_delta: 0.0001
+          label_smoothing: 0.1
+    outs:
+    - path: models/mlp/eval.json
+      hash: md5
+      md5: 386707a12940cf9d3bfe432152a4f094
+      size: 46
+    - path: models/mlp/mlp_best.pth
+      hash: md5
+      md5: 11b09a97ff8f792e94a43daca870e241
+      size: 222906
+  train_cnn:
+    cmd: python src/train.py --model cnn
+    deps:
+    - path: data/processed/
+      hash: md5
+      md5: 13ef9fefb241f59a554c94b6b063228f.dir
+      size: 27117352
+      nfiles: 4818
+    - path: src/evaluate.py
+      hash: md5
+      md5: cdc0070b1ef9aaf0a536fdfce8845632
+      size: 3160
+    - path: src/features/pixels.py
+      hash: md5
+      md5: c426719be7edc3b48072c5bf126beadd
+      size: 5849
+    - path: src/models/dataset.py
+      hash: md5
+      md5: cb3806a2c373ed51610f812941fc7f1d
+      size: 6966
+    - path: src/models/tiny_cnn.py
+      hash: md5
+      md5: 902dc649bf30718dbeedc6920b703dde
+      size: 6690
+    - path: src/train.py
+      hash: md5
+      md5: 10d22ff1b756fd3273738dca5243a789
+      size: 22885
+    - path: src/utils/training_utils.py
+      hash: md5
+      md5: fcdf07e14fa025a9ae3b7b9e5f3fb17b
+      size: 5775
+    params:
+      params.yaml:
+        models.cnn:
+          channels:
+          - 16
+          - 32
+          - 64
+          - 96
+          fc_dim: 128
+          dropout: 0.3
+          input_channels: 3
+        preprocessing.augmentations:
+          random_rotation_degrees: 15
+          horizontal_flip: true
+          color_jitter_brightness: 0.3
+        preprocessing.image_size: 224
+        preprocessing.normalize_mean:
+        - 0.5
+        - 0.5
+        - 0.5
+        preprocessing.normalize_std:
+        - 0.5
+        - 0.5
+        - 0.5
+        training:
+          output_dir: models
+          epochs: 20
+          batch_size: 64
+          optimizer: adam
+          lr: 0.001
+          weight_decay: 0.0001
+          momentum: 0.9
+          scheduler: cosine
+          step_size: 10
+          gamma: 0.1
+          patience: 10
+          min_delta: 0.0001
+          label_smoothing: 0.1
+    outs:
+    - path: models/cnn/cnn_best.pth
+      hash: md5
+      md5: 248513bb1d713dba36b6e6ef127191ca
+      size: 265178
+    - path: models/cnn/eval.json
+      hash: md5
+      md5: d81a26c11b6d8eb69882f593e9def379
+      size: 46

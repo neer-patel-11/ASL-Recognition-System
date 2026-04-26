@@ -159,3 +159,12 @@ docker compose -f docker-compose.airflow.yml down -v
 # Trigger the DAG
 docker compose -f docker-compose.airflow.yml exec airflow-scheduler \
   airflow dags trigger asl_data_ingestion
+
+
+
+
+
+
+MLflow Projects   → how to RUN the project (entry points, env, portability)
+DVC               → how to REPRODUCE it    (caching, data versioning, DAG)
+MLflow Tracking   → how to LOG it          (metrics, params, artifacts)

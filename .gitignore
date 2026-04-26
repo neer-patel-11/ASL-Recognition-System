@@ -6,3 +6,8 @@ data/baseline_stats.json
 temp.py
 **.pyc
 data/
+models/traditional/traditional_model.pkl
+models/mlp/mlp_best.pth
+**.db
+**.pth
+**.pkl
