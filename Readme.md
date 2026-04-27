@@ -168,3 +168,34 @@ docker compose -f docker-compose.airflow.yml exec airflow-scheduler \
 MLflow Projects   → how to RUN the project (entry points, env, portability)
 DVC               → how to REPRODUCE it    (caching, data versioning, DAG)
 MLflow Tracking   → how to LOG it          (metrics, params, artifacts)
+
+
+
+
+PYTHONPATH=src mlflow models serve \
+  -m "mlartifacts/1/models/m-b0ff9d9a6c6846ceab16e575b05a6f92/artifacts" \
+  --host 0.0.0.0 \
+  --port 5001 \
+  --env-manager local
+
+PYTHONPATH=src mlflow models serve \
+  -m "mlartifacts/1/models/m-94ca8303e5b94c9fbe149e2440684de5/artifacts" \
+  --host 0.0.0.0 \
+  --port 5001 \
+  --env-manager local
+
+  
+
+
+PYTHONPATH=src mlflow models serve \
+  -m "mlartifacts/1/models/<Model - id>/artifacts" \
+  --host 0.0.0.0 \
+  --port 5001 \
+  --env-manager local
+
+
+
+
+Fastapi App
+
+sudo docker compose -f docker-compose.api.yml up --build
