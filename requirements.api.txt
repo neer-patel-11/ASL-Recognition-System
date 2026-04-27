@@ -4,3 +4,5 @@ requests
 pillow
 numpy
 python-multipart
+prometheus-fastapi-instrumentator==6.1.0
+scipy==1.12.0

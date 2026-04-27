@@ -199,3 +199,5 @@ PYTHONPATH=src mlflow models serve \
 Fastapi App
 
 sudo docker compose -f docker-compose.api.yml up --build
+
+sudo docker exec -it b0a96bef3736 env | grep ALERT
