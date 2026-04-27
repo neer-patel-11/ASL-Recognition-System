@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ML Inference</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<h1>Image Prediction</h1>
+
+<input type="file" id="fileInput">
+<button onclick="predict()">Predict</button>
+
+<h3>Result:</h3>
+<pre id="result"></pre>
+
+<script>
+async function predict() {
+    const fileInput = document.getElementById("fileInput");
+    const file = fileInput.files[0];
+
+    let formData = new FormData();
+    formData.append("file", file);
+
+    let response = await fetch("/predict", {
+        method: "POST",
+        body: formData
+    });
+
+    let result = await response.json();
+    document.getElementById("result").innerText = JSON.stringify(result, null, 2);
+}
+</script>
+
+</body>
+</html>

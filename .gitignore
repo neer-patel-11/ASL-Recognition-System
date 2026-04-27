@@ -11,3 +11,5 @@ models/mlp/mlp_best.pth
 **.db
 **.pth
 **.pkl
+models/mlp/eval.json
+mlartifacts/

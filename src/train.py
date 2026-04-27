@@ -296,10 +296,28 @@ def train_mlp(params: dict):
         model_save_dir = os.path.join(output_dir, "mlp")
         os.makedirs(model_save_dir, exist_ok=True)
         model_path = os.path.join(model_save_dir, "mlp_best.pth")
-        torch.save({"model_state": model.state_dict(), "classes": classes, "cfg": cfg}, model_path)
+
+
+        from mlflow_wrappers.mlp_wrapper import MLPWrapper
+
+        model_path = os.path.join(model_save_dir, "mlp_best.pth")
+
+        torch.save({
+            "model_state": model.state_dict(),
+            "classes": classes,
+            "cfg": cfg
+        }, model_path)
+
+        mlflow.pyfunc.log_model(
+            artifact_path="pytorch_model",
+            python_model=MLPWrapper(),
+            artifacts={"model_path": model_path}
+        )
+
+        # torch.save({"model_state": model.state_dict(), "classes": classes, "cfg": cfg}, model_path)
 
         # Log PyTorch model to MLflow
-        mlflow.pytorch.log_model(model, artifact_path="pytorch_model")
+        # mlflow.pytorch.log_model(model, artifact_path="pytorch_model")
 
         # Register in MLflow Model Registry
         model_uri = f"runs:/{run.info.run_id}/pytorch_model"
@@ -463,11 +481,27 @@ def train_cnn(params: dict):
         # ── Save & log model ──
         model_save_dir = os.path.join(output_dir, "cnn")
         os.makedirs(model_save_dir, exist_ok=True)
-        model_path = os.path.join(model_save_dir, "cnn_best.pth")
-        torch.save({"model_state": model.state_dict(), "classes": classes, "cfg": cfg}, model_path)
+        # model_path = os.path.join(model_save_dir, "cnn_best.pth")
+        # torch.save({"model_state": model.state_dict(), "classes": classes, "cfg": cfg}, model_path)
 
-        # Log PyTorch model to MLflow
-        mlflow.pytorch.log_model(model, artifact_path="pytorch_model")
+        # # Log PyTorch model to MLflow
+        # mlflow.pytorch.log_model(model, artifact_path="pytorch_model")
+
+        from mlflow_wrappers.cnn_wrapper import CNNWrapper
+
+        model_path = os.path.join(model_save_dir, "cnn_best.pth")
+
+        torch.save({
+            "model_state": model.state_dict(),
+            "classes": classes,
+            "cfg": cfg
+        }, model_path)
+
+        mlflow.pyfunc.log_model(
+            artifact_path="pytorch_model",
+            python_model=CNNWrapper(),
+            artifacts={"model_path": model_path}
+        )
 
         # Register in MLflow Model Registry
         model_uri = f"runs:/{run.info.run_id}/pytorch_model"

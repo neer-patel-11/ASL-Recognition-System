@@ -91,8 +91,8 @@ stages:
       size: 4409
     - path: src/train.py
       hash: md5
-      md5: 10d22ff1b756fd3273738dca5243a789
-      size: 22885
+      md5: c8f9e70ff576421a6db405489814de11
+      size: 23797
     params:
       params.yaml:
         models.traditional:
@@ -148,8 +148,8 @@ stages:
       size: 2405
     - path: src/train.py
       hash: md5
-      md5: 10d22ff1b756fd3273738dca5243a789
-      size: 22885
+      md5: c8f9e70ff576421a6db405489814de11
+      size: 23797
     - path: src/utils/training_utils.py
       hash: md5
       md5: fcdf07e14fa025a9ae3b7b9e5f3fb17b
@@ -179,11 +179,11 @@ stages:
     outs:
     - path: models/mlp/eval.json
       hash: md5
-      md5: 386707a12940cf9d3bfe432152a4f094
+      md5: 1461b35a91183237c52a664e7816c4a7
       size: 46
     - path: models/mlp/mlp_best.pth
       hash: md5
-      md5: 11b09a97ff8f792e94a43daca870e241
+      md5: 0bf87ff280c8197d801f15ac43ff4403
       size: 222906
   train_cnn:
     cmd: python src/train.py --model cnn
@@ -211,8 +211,8 @@ stages:
       size: 6690
     - path: src/train.py
       hash: md5
-      md5: 10d22ff1b756fd3273738dca5243a789
-      size: 22885
+      md5: c8f9e70ff576421a6db405489814de11
+      size: 23797
     - path: src/utils/training_utils.py
       hash: md5
       md5: fcdf07e14fa025a9ae3b7b9e5f3fb17b
@@ -258,9 +258,9 @@ stages:
     outs:
     - path: models/cnn/cnn_best.pth
       hash: md5
-      md5: 248513bb1d713dba36b6e6ef127191ca
+      md5: 21a850ada9f1e3ab065f4ab61c1e90e7
       size: 265178
     - path: models/cnn/eval.json
       hash: md5
-      md5: d81a26c11b6d8eb69882f593e9def379
+      md5: ca9540df4f5fd717a8a421876a74e954
       size: 46
