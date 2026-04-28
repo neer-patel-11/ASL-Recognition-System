@@ -115,7 +115,7 @@ chmod -R 755 data
 docker compose -f docker-compose.airflow.yml up airflow-init
 
 # 5. Start services (after init exits cleanly)
-docker compose -f docker-compose.airflow.yml up -d airflow-webserver airflow-scheduler postgres
+sudo docker compose -f docker-compose.airflow.yml up -d airflow-webserver airflow-scheduler postgres
 
 # 6. Wait ~20 seconds, then check everything is healthy
 docker compose -f docker-compose.airflow.yml ps
