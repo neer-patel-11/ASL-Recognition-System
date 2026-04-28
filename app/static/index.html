@@ -1,36 +1,537 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>ML Inference</title>
-    <link rel="stylesheet" href="/static/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ASL Recognition System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3450;
+      --accent: #6c63ff;
+      --accent2: #00d4aa;
+      --danger: #ff6b6b;
+      --warn: #ffd166;
+      --text: #e8eaf6;
+      --muted: #8b90b8;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--accent);
+    }
+    .nav-brand .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent2); }
+    .nav-links { display: flex; gap: 8px; }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      border-radius: 8px;
+      transition: all .2s;
+    }
+    .nav-links a:hover { background: var(--surface2); color: var(--text); }
+    .nav-links a.active { background: var(--accent); color: #fff; }
+
+    /* ── HERO ── */
+    .hero {
+      text-align: center;
+      padding: 4rem 2rem 2rem;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(108,99,255,.15);
+      border: 1px solid rgba(108,99,255,.3);
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 5px 14px;
+      border-radius: 100px;
+      margin-bottom: 1.5rem;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+    .hero h1 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: .75rem;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero p { color: var(--muted); font-size: 1rem; max-width: 480px; margin: 0 auto; }
+
+    /* ── MAIN GRID ── */
+    .main {
+      max-width: 960px;
+      margin: 2.5rem auto;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 680px) { .main { grid-template-columns: 1fr; } }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+    .card-title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      margin-bottom: 1.2rem;
+    }
+
+    /* ── DROP ZONE ── */
+    .dropzone {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 2.5rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+      position: relative;
+    }
+    .dropzone:hover, .dropzone.drag-over {
+      border-color: var(--accent);
+      background: rgba(108,99,255,.06);
+    }
+    .dropzone input[type=file] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    .dropzone-icon {
+      font-size: 2.5rem;
+      margin-bottom: .75rem;
+      display: block;
+    }
+    .dropzone p { color: var(--muted); font-size: .9rem; }
+    .dropzone strong { color: var(--text); }
+
+    #preview-wrap {
+      margin-top: 1rem;
+      display: none;
+      text-align: center;
+    }
+    #preview-img {
+      max-height: 200px;
+      border-radius: 10px;
+      border: 2px solid var(--accent);
+      object-fit: contain;
+    }
+
+    /* ── BUTTON ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 22px;
+      border-radius: 10px;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all .2s;
+      width: 100%;
+      margin-top: 1rem;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #574fd6; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── RESULT PANEL ── */
+    #result-panel { display: none; }
+    .result-letter {
+      text-align: center;
+      font-size: 5rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+      margin: .5rem 0;
+    }
+    .result-label {
+      text-align: center;
+      font-size: .8rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem;
+      margin-top: 1.2rem;
+    }
+    .metric-chip {
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: .75rem;
+      text-align: center;
+    }
+    .metric-chip .val {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--accent2);
+    }
+    .metric-chip .lbl {
+      font-size: .7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-top: 2px;
+    }
+
+    /* ── CONFIDENCE BAR ── */
+    .conf-row {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      margin-top: .6rem;
+    }
+    .conf-label { font-size: .85rem; font-weight: 600; min-width: 24px; }
+    .conf-bar-wrap { flex: 1; background: var(--surface2); border-radius: 6px; height: 8px; overflow: hidden; }
+    .conf-bar { height: 100%; background: var(--accent); border-radius: 6px; transition: width .5s ease; }
+    .conf-pct { font-size: .8rem; color: var(--muted); min-width: 40px; text-align: right; }
+
+    /* ── DRIFT INDICATOR ── */
+    .drift-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 1rem;
+      padding: .75rem 1rem;
+      border-radius: 10px;
+      background: var(--surface2);
+      font-size: .85rem;
+    }
+    .drift-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .drift-ok { background: var(--accent2); }
+    .drift-warn { background: var(--warn); }
+    .drift-bad { background: var(--danger); }
+
+    /* ── STATUS BAR ── */
+    #status-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: .6rem 1rem;
+      border-radius: 8px;
+      font-size: .82rem;
+      background: var(--surface2);
+      margin-top: 1rem;
+      min-height: 40px;
+    }
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── FULL-WIDTH BOTTOM CARD ── */
+    .full-width { grid-column: 1 / -1; }
+    .history-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: .6rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: .85rem;
+    }
+    .history-row:last-child { border-bottom: none; }
+    .tag {
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: .72rem;
+      font-weight: 600;
+    }
+    .tag-ok { background: rgba(0,212,170,.15); color: var(--accent2); }
+    .tag-err { background: rgba(255,107,107,.15); color: var(--danger); }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: .8rem;
+      border-top: 1px solid var(--border);
+      margin-top: 3rem;
+    }
+  </style>
 </head>
 <body>
 
-<h1>Image Prediction</h1>
+<nav>
+  <div class="nav-brand">
+    <div class="dot"></div>
+    ASL Recognition
+  </div>
+  <div class="nav-links">
+    <a href="/" class="active">Predict</a>
+    <a href="/admin/pipeline">⚙ Pipeline Admin</a>
+    <a href="/docs">API Docs</a>
+    <a href="/metrics">Metrics</a>
+  </div>
+</nav>
 
-<input type="file" id="fileInput">
-<button onclick="predict()">Predict</button>
+<div class="hero">
+  <div class="hero-badge">🤟 AI-Powered Sign Language</div>
+  <h1>American Sign Language<br><span>Recognition System</span></h1>
+  <p>Upload a hand-sign image to identify the ASL letter using deep learning inference.</p>
+</div>
 
-<h3>Result:</h3>
-<pre id="result"></pre>
+<div class="main">
+
+  <!-- Upload Card -->
+  <div class="card">
+    <div class="card-title">📤 Upload Image</div>
+    <div class="dropzone" id="dropzone">
+      <input type="file" id="fileInput" accept="image/*" onchange="handleFile(this)" />
+      <span class="dropzone-icon">🖼️</span>
+      <p><strong>Click to browse</strong> or drag & drop</p>
+      <p style="margin-top:4px;font-size:.78rem;">PNG, JPG, WEBP supported</p>
+    </div>
+
+    <div id="preview-wrap">
+      <img id="preview-img" src="" alt="preview" />
+      <p style="color:var(--muted);font-size:.8rem;margin-top:.5rem;" id="file-name"></p>
+    </div>
+
+    <button class="btn btn-primary" onclick="predict()" id="predict-btn" disabled>
+      ✨ Identify Sign
+    </button>
+
+    <div id="status-bar">
+      <div class="spinner" id="spinner"></div>
+      <span id="status-msg" style="color:var(--muted)">Waiting for image upload…</span>
+    </div>
+  </div>
+
+  <!-- Result Card -->
+  <div class="card">
+    <div class="card-title">🎯 Result</div>
+
+    <div id="empty-state" style="text-align:center;padding:2rem 0;color:var(--muted)">
+      <div style="font-size:3rem;margin-bottom:1rem">🤟</div>
+      <p>Results will appear here after prediction</p>
+    </div>
+
+    <div id="result-panel">
+      <div class="result-letter" id="predicted-letter">—</div>
+      <div class="result-label">Predicted Sign</div>
+
+      <div class="metrics-grid">
+        <div class="metric-chip">
+          <div class="val" id="conf-val">—</div>
+          <div class="lbl">Confidence</div>
+        </div>
+        <div class="metric-chip">
+          <div class="val" id="latency-val">—</div>
+          <div class="lbl">Latency (ms)</div>
+        </div>
+      </div>
+
+      <div style="margin-top:1.4rem">
+        <div class="card-title">Top Predictions</div>
+        <div id="top-preds"></div>
+      </div>
+
+      <div id="drift-panel" class="drift-indicator">
+        <div class="drift-dot drift-ok" id="drift-dot"></div>
+        <span id="drift-text">Data drift normal</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- History Card -->
+  <div class="card full-width">
+    <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+      <span>📋 Prediction History</span>
+      <button class="btn btn-outline" style="width:auto;margin:0;padding:5px 14px;font-size:.8rem" onclick="clearHistory()">Clear</button>
+    </div>
+    <div id="history-list">
+      <p style="color:var(--muted);font-size:.85rem;text-align:center;padding:1.5rem">No predictions yet</p>
+    </div>
+  </div>
+
+</div>
+
+<footer>ASL Recognition System &nbsp;|&nbsp; MLOps Project &nbsp;|&nbsp; <a href="/admin/pipeline" style="color:var(--accent);text-decoration:none">Admin Panel ↗</a></footer>
 
 <script>
-async function predict() {
-    const fileInput = document.getElementById("fileInput");
-    const file = fileInput.files[0];
+  const history = [];
 
-    let formData = new FormData();
-    formData.append("file", file);
+  function handleFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    document.getElementById('preview-img').src = url;
+    document.getElementById('file-name').textContent = file.name;
+    document.getElementById('preview-wrap').style.display = 'block';
+    document.getElementById('predict-btn').disabled = false;
+    setStatus('✅ Image loaded — ready to predict', '#e8eaf6');
+  }
 
-    let response = await fetch("/predict", {
-        method: "POST",
-        body: formData
-    });
+  // drag-drop
+  const dz = document.getElementById('dropzone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      document.getElementById('fileInput').files = e.dataTransfer.files;
+      handleFile({ files: e.dataTransfer.files });
+    }
+  });
 
-    let result = await response.json();
-    document.getElementById("result").innerText = JSON.stringify(result, null, 2);
-}
+  function setStatus(msg, color = 'var(--muted)') {
+    document.getElementById('status-msg').textContent = msg;
+    document.getElementById('status-msg').style.color = color;
+  }
+
+  async function predict() {
+    const fileInput = document.getElementById('fileInput');
+    if (!fileInput.files[0]) return;
+
+    document.getElementById('predict-btn').disabled = true;
+    document.getElementById('spinner').style.display = 'block';
+    setStatus('⏳ Running inference…', 'var(--accent)');
+
+    const fd = new FormData();
+    fd.append('file', fileInput.files[0]);
+
+    try {
+      const res = await fetch('/predict', { method: 'POST', body: fd });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.detail || 'Prediction failed');
+
+      renderResult(data, fileInput.files[0].name);
+      setStatus('✅ Prediction complete!', 'var(--accent2)');
+    } catch (err) {
+      setStatus('❌ ' + err.message, 'var(--danger)');
+      console.error(err);
+    } finally {
+      document.getElementById('predict-btn').disabled = false;
+      document.getElementById('spinner').style.display = 'none';
+    }
+  }
+
+  function renderResult(data, filename) {
+    document.getElementById('empty-state').style.display = 'none';
+    document.getElementById('result-panel').style.display = 'block';
+
+    // Extract prediction — handle MLflow response formats
+    let preds = data.predictions || data.outputs || data;
+    let topPreds = [];
+
+    if (Array.isArray(preds) && preds.length > 0) {
+      const first = preds[0];
+      if (typeof first === 'object' && first !== null) {
+        topPreds = Object.entries(first)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5);
+      } else {
+        topPreds = [['Result', first]];
+      }
+    } else if (typeof preds === 'string') {
+      topPreds = [[preds, 1.0]];
+    }
+
+    const best = topPreds[0] || ['?', 0];
+    document.getElementById('predicted-letter').textContent = String(best[0]).toUpperCase();
+    document.getElementById('conf-val').textContent = (best[1] * 100).toFixed(1) + '%';
+    document.getElementById('latency-val').textContent = data.latency_ms ? Math.round(data.latency_ms) : '—';
+
+    // Top predictions bars
+    const container = document.getElementById('top-preds');
+    container.innerHTML = topPreds.map(([label, score]) => `
+      <div class="conf-row">
+        <span class="conf-label">${String(label).toUpperCase()}</span>
+        <div class="conf-bar-wrap"><div class="conf-bar" style="width:${(score*100).toFixed(1)}%"></div></div>
+        <span class="conf-pct">${(score*100).toFixed(1)}%</span>
+      </div>`).join('');
+
+    // Drift
+    const psi = data.drift_psi || 0;
+    const dot = document.getElementById('drift-dot');
+    const txt = document.getElementById('drift-text');
+    dot.className = 'drift-dot ' + (psi < 0.1 ? 'drift-ok' : psi < 0.2 ? 'drift-warn' : 'drift-bad');
+    txt.textContent = `Drift PSI: ${psi.toFixed(5)} — ${psi < 0.1 ? 'Stable ✓' : psi < 0.2 ? 'Minor shift ⚠' : 'Significant drift ✗'}`;
+
+    // History
+    history.unshift({ letter: String(best[0]).toUpperCase(), conf: (best[1]*100).toFixed(1), filename, ts: new Date().toLocaleTimeString() });
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const el = document.getElementById('history-list');
+    if (!history.length) { el.innerHTML = '<p style="color:var(--muted);font-size:.85rem;text-align:center;padding:1.5rem">No predictions yet</p>'; return; }
+    el.innerHTML = history.slice(0, 10).map(h => `
+      <div class="history-row">
+        <span style="font-weight:600;color:var(--accent)">${h.letter}</span>
+        <span style="color:var(--muted)">${h.filename}</span>
+        <span class="tag tag-ok">${h.conf}%</span>
+        <span style="color:var(--muted);font-size:.78rem">${h.ts}</span>
+      </div>`).join('');
+  }
+
+  function clearHistory() {
+    history.length = 0;
+    renderHistory();
+  }
 </script>
-
 </body>
 </html>

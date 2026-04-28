@@ -29,5 +29,8 @@ class CNNWrapper(mlflow.pyfunc.PythonModel):
         with torch.no_grad():
             logits = self.model(x)
             preds = torch.argmax(logits, dim=1).numpy()
-
+            print("We are here in the wrapper")
+            print("Classes:", self.classes)
+            print("Logits:", logits)
+            print("Preds:", preds)
         return [self.classes[i] for i in preds]

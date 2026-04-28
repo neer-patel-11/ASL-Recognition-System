@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pipeline Admin | ASL Recognition</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3450;
+      --accent: #6c63ff;
+      --accent2: #00d4aa;
+      --danger: #ff6b6b;
+      --warn: #ffd166;
+      --success: #06d6a0;
+      --text: #e8eaf6;
+      --muted: #8b90b8;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-brand { font-weight: 700; font-size: 1.05rem; color: var(--accent); display: flex; gap: 10px; align-items: center; }
+    .nav-brand .badge { background: rgba(255,209,102,.15); color: var(--warn); border: 1px solid rgba(255,209,102,.3); font-size: .7rem; padding: 2px 8px; border-radius: 6px; font-weight: 600; }
+    .nav-links { display: flex; gap: 8px; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: .85rem; padding: 6px 14px; border-radius: 8px; transition: all .2s; }
+    .nav-links a:hover { background: var(--surface2); color: var(--text); }
+    .nav-links a.active { background: var(--accent); color: #fff; }
+
+    .page { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+    /* ── TABS ── */
+    .tabs { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 4px; margin-bottom: 2rem; width: fit-content; }
+    .tab-btn {
+      padding: 8px 18px; border-radius: 9px; border: none; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: .85rem; font-weight: 500;
+      background: transparent; color: var(--muted); transition: all .2s;
+    }
+    .tab-btn.active { background: var(--accent); color: #fff; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ── STAT ROW ── */
+    .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+    @media(max-width:760px){ .stat-row { grid-template-columns: 1fr 1fr; } }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.2rem 1.4rem;
+    }
+    .stat-card .val { font-size: 1.9rem; font-weight: 700; color: var(--accent); }
+    .stat-card .lbl { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin-top: 4px; }
+    .stat-card .val.green { color: var(--accent2); }
+    .stat-card .val.red { color: var(--danger); }
+    .stat-card .val.yellow { color: var(--warn); }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.2rem;
+    }
+    .card-title { font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+
+    /* ── TABLE ── */
+    table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    th { text-align: left; padding: .6rem .8rem; color: var(--muted); font-weight: 500; font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid var(--border); }
+    td { padding: .7rem .8rem; border-bottom: 1px solid rgba(46,52,80,.5); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(108,99,255,.04); }
+
+    /* ── BADGE ── */
+    .badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-size: .72rem;
+      font-weight: 600;
+    }
+    .badge-success { background: rgba(6,214,160,.15); color: var(--success); }
+    .badge-running { background: rgba(108,99,255,.2); color: var(--accent); }
+    .badge-failed { background: rgba(255,107,107,.15); color: var(--danger); }
+    .badge-finished { background: rgba(0,212,170,.15); color: var(--accent2); }
+    .badge-staging { background: rgba(255,209,102,.15); color: var(--warn); }
+    .badge-production { background: rgba(6,214,160,.2); color: var(--success); }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 18px; border-radius: 9px; font-size: .85rem; font-weight: 600;
+      cursor: pointer; border: none; transition: all .2s; font-family: 'Inter', sans-serif;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #574fd6; }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-success { background: var(--success); color: #000; }
+    .btn-success:hover { background: #04b889; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-danger { background: rgba(255,107,107,.15); color: var(--danger); border: 1px solid rgba(255,107,107,.3); }
+    .btn-danger:hover { background: rgba(255,107,107,.25); }
+    .btn-sm { padding: 5px 12px; font-size: .78rem; }
+
+    /* ── LOG CONSOLE ── */
+    .console {
+      background: #0a0c14;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.2rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .78rem;
+      max-height: 380px;
+      overflow-y: auto;
+      line-height: 1.7;
+    }
+    .log-line { display: flex; gap: 1rem; padding: 1px 0; }
+    .log-ts { color: #4a5380; flex-shrink: 0; }
+    .log-stage { color: var(--accent); min-width: 100px; }
+    .log-ok { color: var(--success); }
+    .log-err { color: var(--danger); }
+    .log-info { color: var(--accent2); }
+    .log-details { color: var(--muted); }
+
+    /* ── TEST RESULTS ── */
+    .test-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .test-metric { background: var(--surface2); border-radius: 10px; padding: 1rem; text-align: center; }
+    .test-metric .n { font-size: 2.2rem; font-weight: 700; }
+    .test-metric .l { font-size: .73rem; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin-top: 2px; }
+    .test-pass { color: var(--success); }
+    .test-fail { color: var(--danger); }
+    .test-total { color: var(--accent); }
+
+    .test-case { padding: .65rem .8rem; border-bottom: 1px solid rgba(46,52,80,.4); font-size: .82rem; display: flex; gap: .75rem; align-items: flex-start; }
+    .test-case:last-child { border-bottom: none; }
+    .tc-icon { flex-shrink: 0; margin-top: 1px; }
+    .tc-name { font-family: 'JetBrains Mono', monospace; color: var(--muted); word-break: break-all; }
+    .tc-dur { flex-shrink: 0; color: var(--muted); font-size: .75rem; }
+    .tc-err { color: var(--danger); font-size: .78rem; margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
+
+    /* ── METRIC BAR ── */
+    .model-row { display: flex; align-items: center; gap: 1rem; padding: .7rem 0; border-bottom: 1px solid var(--border); }
+    .model-row:last-child { border-bottom: none; }
+    .model-name { min-width: 180px; font-size: .85rem; font-weight: 500; }
+    .model-bar-wrap { flex: 1; background: var(--surface2); border-radius: 6px; height: 10px; }
+    .model-bar { height: 100%; border-radius: 6px; transition: width .6s ease; }
+    .bar-cnn { background: linear-gradient(90deg, var(--accent), #a89cff); }
+    .bar-mlp { background: linear-gradient(90deg, var(--accent2), #68f0da); }
+    .bar-knn { background: linear-gradient(90deg, var(--warn), #ffe066); }
+    .bar-rf { background: linear-gradient(90deg, var(--success), #4af9ce); }
+    .model-pct { min-width: 60px; text-align: right; font-weight: 600; font-size: .85rem; }
+
+    /* ── SPINNER ── */
+    .spinner {
+      width: 16px; height: 16px; border: 2px solid var(--border);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin .7s linear infinite; display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty-state { text-align: center; padding: 2.5rem; color: var(--muted); font-size: .9rem; }
+    .progress-ring { display: inline-block; margin-bottom: .5rem; }
+
+    .run-suite-row { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .stdout-block {
+      background: #0a0c14; border: 1px solid var(--border); border-radius: 8px;
+      padding: .8rem 1rem; font-family: 'JetBrains Mono', monospace; font-size: .75rem;
+      max-height: 250px; overflow-y: auto; color: #a0a8d0; line-height: 1.6;
+      white-space: pre-wrap; word-break: break-all;
+    }
+    .acceptance-row { display: flex; justify-content: space-between; align-items: center; padding: .6rem 0; border-bottom: 1px solid var(--border); font-size: .85rem; }
+    .acceptance-row:last-child { border-bottom: none; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">
+    ⚙ Pipeline Admin
+    <span class="badge">ADMIN</span>
+  </div>
+  <div class="nav-links">
+    <a href="/">← Back to App</a>
+    <a href="/admin/pipeline" class="active">Pipeline</a>
+    <a href="/docs">API Docs</a>
+    <a href="/metrics">Metrics</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- Stats Row -->
+  <div class="stat-row" id="stat-row">
+    <div class="stat-card"><div class="val" id="s-total">—</div><div class="lbl">Total Runs</div></div>
+    <div class="stat-card"><div class="val green" id="s-success">—</div><div class="lbl">Successful</div></div>
+    <div class="stat-card"><div class="val red" id="s-errors">—</div><div class="lbl">Errors</div></div>
+    <div class="stat-card"><div class="val yellow" id="s-rate">—</div><div class="lbl">Success Rate</div></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('pipeline')">📊 Pipeline Console</button>
+    <button class="tab-btn" onclick="switchTab('mlflow')">🔬 MLflow Experiments</button>
+    <button class="tab-btn" onclick="switchTab('models')">📦 Model Registry</button>
+    <button class="tab-btn" onclick="switchTab('metrics')">📈 Model Metrics</button>
+    <button class="tab-btn" onclick="switchTab('tests')">🧪 Test Runner</button>
+  </div>
+
+  <!-- ── TAB: PIPELINE CONSOLE ── -->
+  <div class="tab-content active" id="tab-pipeline">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🖥 Live Pipeline Log</div>
+        <div style="display:flex;gap:.5rem">
+          <button class="btn btn-outline btn-sm" onclick="loadLog('success')">✅ Success only</button>
+          <button class="btn btn-danger btn-sm" onclick="loadLog('error')">❌ Errors only</button>
+          <button class="btn btn-primary btn-sm" onclick="loadLog()">🔄 Refresh</button>
+        </div>
+      </div>
+      <div class="console" id="pipeline-console">
+        <div class="log-line"><span class="log-ts">--:--:--</span><span class="log-info">Waiting for pipeline events…</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">⚡ Pipeline Throughput & Stats</div>
+        <button class="btn btn-outline btn-sm" onclick="loadStats()">🔄 Refresh</button>
+      </div>
+      <div id="stats-panel">
+        <div class="empty-state">Click Refresh to load stats</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: MLFLOW EXPERIMENTS ── -->
+  <div class="tab-content" id="tab-mlflow">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🔬 MLflow Experiments</div>
+        <button class="btn btn-primary btn-sm" onclick="loadExperiments()">🔄 Load</button>
+      </div>
+      <div id="experiments-panel">
+        <div class="empty-state">Click Load to fetch experiments from MLflow</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: MODEL REGISTRY ── -->
+  <div class="tab-content" id="tab-models">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📦 Registered Models</div>
+        <button class="btn btn-primary btn-sm" onclick="loadModels()">🔄 Load</button>
+      </div>
+      <div id="models-panel">
+        <div class="empty-state">Click Load to fetch registered models from MLflow</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: MODEL METRICS ── -->
+  <div class="tab-content" id="tab-metrics">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📈 Model Performance Comparison</div>
+        <button class="btn btn-primary btn-sm" onclick="loadMetrics()">🔄 Load</button>
+      </div>
+      <div id="metrics-panel">
+        <div class="empty-state">Click Load to fetch model metrics</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: TEST RUNNER ── -->
+  <div class="tab-content" id="tab-tests">
+    <div class="card">
+      <div class="card-title" style="margin-bottom:1rem">🚀 Run Test Suite</div>
+      <div class="run-suite-row">
+        <button class="btn btn-success" onclick="runTests('all')" id="btn-all">▶ Run All Tests</button>
+        <button class="btn btn-primary" onclick="runTests('unit')" id="btn-unit">▶ Unit Tests</button>
+        <button class="btn btn-outline" onclick="runTests('integration')" id="btn-int">▶ Integration Tests</button>
+        <button class="btn btn-outline btn-sm" onclick="loadTestHistory()">📋 Load History</button>
+      </div>
+
+      <div id="test-running" style="display:none;padding:1.5rem;text-align:center;color:var(--muted)">
+        <div class="spinner" style="width:24px;height:24px;margin:0 auto 1rem"></div>
+        <div>Running tests… this may take up to 60 seconds</div>
+      </div>
+
+      <div id="test-result-panel" style="display:none">
+        <div class="test-summary">
+          <div class="test-metric"><div class="n test-pass" id="tr-passed">0</div><div class="l">Passed ✅</div></div>
+          <div class="test-metric"><div class="n test-fail" id="tr-failed">0</div><div class="l">Failed ❌</div></div>
+          <div class="test-metric"><div class="n test-total" id="tr-total">0</div><div class="l">Total</div></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem">
+          <div style="font-size:.85rem;color:var(--muted)">
+            Duration: <strong id="tr-dur" style="color:var(--text)">—</strong> &nbsp;|&nbsp;
+            Suite: <strong id="tr-suite" style="color:var(--accent)">—</strong> &nbsp;|&nbsp;
+            Status: <strong id="tr-status">—</strong>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="document.getElementById('stdout-wrap').style.display = document.getElementById('stdout-wrap').style.display==='none'?'block':'none'">Toggle Output</button>
+        </div>
+        <div id="test-cases-list" style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem"></div>
+        <div id="stdout-wrap" style="display:none">
+          <div class="card-title" style="margin-bottom:.5rem">Raw Output</div>
+          <div class="stdout-block" id="tr-stdout"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acceptance Criteria -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom:1rem">✅ Acceptance Criteria</div>
+      <div id="acceptance-table"></div>
+    </div>
+
+    <!-- Test History -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom:1rem">📋 Test Run History</div>
+      <div id="test-history-list">
+        <div class="empty-state">Click "Load History" above to view past runs</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+  // ── Tab switching ──────────────────────────────────────────
+  function switchTab(name) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelector(`#tab-${name}`).classList.add('active');
+    event.target.classList.add('active');
+    if (name === 'pipeline') { loadLog(); loadStats(); }
+  }
+
+  // ── Load pipeline log ──────────────────────────────────────
+  async function loadLog(filter = '') {
+    const url = '/admin/pipeline/log?limit=80' + (filter ? `&status_filter=${filter}` : '');
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      updateStats(data);
+      renderLog(data.events || []);
+    } catch(e) { renderLog([], e.message); }
+  }
+
+  function updateStats(data) {
+    document.getElementById('s-total').textContent = data.total_events ?? '—';
+    document.getElementById('s-success').textContent = data.success ?? '—';
+    document.getElementById('s-errors').textContent = data.errors ?? '—';
+    document.getElementById('s-rate').textContent = (data.success_rate ?? '—') + (data.success_rate != null ? '%' : '');
+  }
+
+  function renderLog(events, err = null) {
+    const el = document.getElementById('pipeline-console');
+    if (err) { el.innerHTML = `<div class="log-line"><span class="log-err">ERROR: ${err}</span></div>`; return; }
+    if (!events.length) { el.innerHTML = `<div class="log-line"><span class="log-info">No events yet. Make a prediction to see logs here.</span></div>`; return; }
+    el.innerHTML = events.map(e => {
+      const ts = e.timestamp.split('T')[1]?.split('.')[0] || e.timestamp;
+      const cls = e.status === 'success' ? 'log-ok' : e.status === 'error' ? 'log-err' : 'log-info';
+      return `<div class="log-line">
+        <span class="log-ts">${ts}</span>
+        <span class="log-stage">${e.stage}</span>
+        <span class="${cls}">${e.status.toUpperCase()}</span>
+        <span class="log-details">${e.details || ''}</span>
+        <span class="log-ts">${e.duration_ms}ms</span>
+      </div>`;
+    }).join('');
+    el.scrollTop = el.scrollHeight;
+  }
+
+  async function loadStats() {
+    try {
+      const res = await fetch('/admin/pipeline/stats');
+      const d = await res.json();
+      if (d.message) { document.getElementById('stats-panel').innerHTML = `<div class="empty-state">${d.message}</div>`; return; }
+      document.getElementById('stats-panel').innerHTML = `
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem">
+          ${[
+            ['Total Runs', d.total_runs],
+            ['Avg Latency', d.avg_latency_ms + 'ms'],
+            ['Min Latency', d.min_latency_ms + 'ms'],
+            ['Max Latency', d.max_latency_ms + 'ms'],
+          ].map(([l,v]) => `<div class="stat-card"><div class="val" style="font-size:1.4rem">${v}</div><div class="lbl">${l}</div></div>`).join('')}
+        </div>
+        <div style="margin-top:1rem;font-size:.85rem;color:var(--muted)">Active stages: <strong style="color:var(--accent)">${(d.stages||[]).join(', ') || 'none'}</strong></div>`;
+    } catch(e) {
+      document.getElementById('stats-panel').innerHTML = `<div class="empty-state" style="color:var(--danger)">Failed to load stats</div>`;
+    }
+  }
+
+  // ── MLflow Experiments ─────────────────────────────────────
+  async function loadExperiments() {
+    const el = document.getElementById('experiments-panel');
+    el.innerHTML = '<div class="empty-state"><div class="spinner"></div></div>';
+    try {
+      const res = await fetch('/admin/mlflow/experiments');
+      if (res.status === 503) throw new Error('MLflow server not reachable');
+      const d = await res.json();
+      if (!d.experiments?.length) { el.innerHTML = '<div class="empty-state">No experiments found</div>'; return; }
+      el.innerHTML = d.experiments.map(exp => `
+        <div style="margin-bottom:1.5rem">
+          <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
+            <span style="font-weight:600;color:var(--text)">${exp.name}</span>
+            <span class="badge badge-${exp.lifecycle_stage}">${exp.lifecycle_stage}</span>
+            <span style="font-size:.75rem;color:var(--muted)">ID: ${exp.experiment_id}</span>
+          </div>
+          ${exp.recent_runs.length ? `
+          <table>
+            <thead><tr><th>Run ID</th><th>Status</th><th>Metrics</th><th>Started</th></tr></thead>
+            <tbody>
+              ${exp.recent_runs.map(r => `
+                <tr>
+                  <td style="font-family:JetBrains Mono,monospace;font-size:.75rem">${r.run_id.slice(0,12)}…</td>
+                  <td><span class="badge badge-${r.status.toLowerCase()}">${r.status}</span></td>
+                  <td style="font-size:.78rem;color:var(--muted)">${Object.entries(r.metrics).map(([k,v])=>`${k}: ${typeof v==='number'?v.toFixed(4):v}`).join(' | ') || '—'}</td>
+                  <td style="font-size:.78rem;color:var(--muted)">${r.start_time ? new Date(r.start_time).toLocaleString() : '—'}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>` : '<div style="font-size:.82rem;color:var(--muted);padding:.5rem 0">No runs yet</div>'}
+        </div>`).join('<hr style="border:none;border-top:1px solid var(--border);margin:1rem 0">');
+    } catch(e) {
+      el.innerHTML = `<div class="empty-state" style="color:var(--danger)">⚠ ${e.message}<br><small style="color:var(--muted);margin-top:.5rem;display:block">Make sure MLflow is running at the configured URL</small></div>`;
+    }
+  }
+
+  // ── Model Registry ─────────────────────────────────────────
+  async function loadModels() {
+    const el = document.getElementById('models-panel');
+    el.innerHTML = '<div class="empty-state"><div class="spinner"></div></div>';
+    try {
+      const res = await fetch('/admin/mlflow/models');
+      if (res.status === 503) throw new Error('MLflow not reachable');
+      const d = await res.json();
+      if (!d.models?.length) { el.innerHTML = '<div class="empty-state">No registered models found</div>'; return; }
+      el.innerHTML = `<table>
+        <thead><tr><th>Model Name</th><th>Version</th><th>Stage</th><th>Status</th><th>Run ID</th><th>Created</th></tr></thead>
+        <tbody>
+          ${d.models.flatMap(m => m.latest_versions.map(v => `
+            <tr>
+              <td style="font-weight:600">${m.name}</td>
+              <td>v${v.version}</td>
+              <td><span class="badge badge-${(v.stage||'none').toLowerCase()}">${v.stage || 'None'}</span></td>
+              <td><span class="badge badge-${v.status?.toLowerCase()}">${v.status}</span></td>
+              <td style="font-family:JetBrains Mono,monospace;font-size:.75rem">${v.run_id?.slice(0,12)}…</td>
+              <td style="font-size:.78rem;color:var(--muted)">${v.creation_timestamp ? new Date(v.creation_timestamp).toLocaleDateString() : '—'}</td>
+            </tr>`)).join('')}
+        </tbody>
+      </table>`;
+    } catch(e) {
+      el.innerHTML = `<div class="empty-state" style="color:var(--danger)">⚠ ${e.message}</div>`;
+    }
+  }
+
+  // ── Model Metrics ──────────────────────────────────────────
+  async function loadMetrics() {
+    const el = document.getElementById('metrics-panel');
+    el.innerHTML = '<div class="empty-state"><div class="spinner"></div></div>';
+    try {
+      const res = await fetch('/admin/mlflow/metrics');
+      const d = await res.json();
+      if (!d.metrics?.length) { el.innerHTML = '<div class="empty-state">No metric files found</div>'; return; }
+      const barClasses = ['bar-cnn','bar-mlp','bar-knn','bar-rf'];
+      el.innerHTML = `
+        <div style="margin-bottom:1.5rem">
+          <div class="card-title" style="margin-bottom:1rem">Accuracy Comparison</div>
+          ${d.metrics.map((m,i) => `
+            <div class="model-row">
+              <div class="model-name">${m.model.replace(/_/g,' ')}</div>
+              <div class="model-bar-wrap"><div class="model-bar ${barClasses[i%barClasses.length]}" style="width:${((m.accuracy||0)*100).toFixed(1)}%"></div></div>
+              <div class="model-pct">${((m.accuracy||0)*100).toFixed(1)}%</div>
+            </div>`).join('')}
+        </div>
+        <div>
+          <div class="card-title" style="margin-bottom:1rem">Macro F1 Comparison</div>
+          ${d.metrics.map((m,i) => `
+            <div class="model-row">
+              <div class="model-name">${m.model.replace(/_/g,' ')}</div>
+              <div class="model-bar-wrap"><div class="model-bar ${barClasses[i%barClasses.length]}" style="width:${((m.macro_f1||0)*100).toFixed(1)}%"></div></div>
+              <div class="model-pct">${((m.macro_f1||0)*100).toFixed(1)}%</div>
+            </div>`).join('')}
+        </div>
+        <div style="margin-top:1.5rem">
+          <table>
+            <thead><tr><th>Model</th><th>Accuracy</th><th>Macro F1</th></tr></thead>
+            <tbody>
+              ${d.metrics.map(m => `<tr>
+                <td style="font-weight:600">${m.model.replace(/_/g,' ')}</td>
+                <td>${((m.accuracy||0)*100).toFixed(2)}%</td>
+                <td>${((m.macro_f1||0)*100).toFixed(2)}%</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    } catch(e) {
+      el.innerHTML = `<div class="empty-state" style="color:var(--danger)">⚠ ${e.message}</div>`;
+    }
+  }
+
+  // ── Test Runner ────────────────────────────────────────────
+  async function runTests(suite) {
+    ['all','unit','int'].forEach(s => { const b = document.getElementById('btn-'+s); if(b) b.disabled = true; });
+    document.getElementById('test-running').style.display = 'block';
+    document.getElementById('test-result-panel').style.display = 'none';
+
+    try {
+      const res = await fetch(`/admin/tests/run?suite=${suite}`, { method: 'POST' });
+      const d = await res.json();
+      renderTestResult(d);
+    } catch(e) {
+      document.getElementById('test-running').style.display = 'none';
+      alert('Test run failed: ' + e.message);
+    } finally {
+      ['all','unit','int'].forEach(s => { const b = document.getElementById('btn-'+s); if(b) b.disabled = false; });
+    }
+  }
+
+  function renderTestResult(d) {
+    document.getElementById('test-running').style.display = 'none';
+    document.getElementById('test-result-panel').style.display = 'block';
+    document.getElementById('tr-passed').textContent = d.passed ?? 0;
+    document.getElementById('tr-failed').textContent = d.failed ?? 0;
+    document.getElementById('tr-total').textContent = d.total ?? 0;
+    document.getElementById('tr-dur').textContent = Math.round(d.duration_ms || 0) + 'ms';
+    document.getElementById('tr-suite').textContent = d.suite || '—';
+    const statusEl = document.getElementById('tr-status');
+    statusEl.textContent = d.status === 'passed' ? '✅ PASSED' : '❌ FAILED';
+    statusEl.style.color = d.status === 'passed' ? 'var(--success)' : 'var(--danger)';
+    document.getElementById('tr-stdout').textContent = d.stdout || '(no output)';
+
+    const cases = d.tests || [];
+    document.getElementById('test-cases-list').innerHTML = cases.length
+      ? cases.map(t => `
+          <div class="test-case">
+            <span class="tc-icon">${t.outcome === 'passed' ? '✅' : t.outcome === 'failed' ? '❌' : '⚠️'}</span>
+            <div style="flex:1">
+              <div class="tc-name">${t.nodeid}</div>
+              ${t.message ? `<div class="tc-err">${String(t.message).slice(0,200)}</div>` : ''}
+            </div>
+            <span class="tc-dur">${t.duration}ms</span>
+          </div>`).join('')
+      : '<div class="empty-state">No individual test data — check stdout above</div>';
+
+    updateAcceptance(d);
+  }
+
+  function updateAcceptance(d) {
+    const criteria = [
+      { name: 'All tests run without crash', met: d.total > 0 },
+      { name: 'Unit test pass rate ≥ 80%', met: d.total > 0 && (d.passed / d.total) >= 0.8 },
+      { name: 'No import/syntax errors', met: !d.stdout?.includes('SyntaxError') && !d.stdout?.includes('ImportError') },
+      { name: 'Test suite completes within 120s', met: d.duration_ms < 120000 },
+      { name: 'Integration tests reach /health endpoint', met: !d.stdout?.includes('ConnectionRefusedError') },
+    ];
+    document.getElementById('acceptance-table').innerHTML = criteria.map(c => `
+      <div class="acceptance-row">
+        <span>${c.name}</span>
+        <span class="badge ${c.met ? 'badge-success' : 'badge-failed'}">${c.met ? '✅ MET' : '❌ NOT MET'}</span>
+      </div>`).join('');
+  }
+
+  async function loadTestHistory() {
+    try {
+      const res = await fetch('/admin/tests/history?limit=10');
+      const d = await res.json();
+      const el = document.getElementById('test-history-list');
+      if (!d.runs?.length) { el.innerHTML = '<div class="empty-state">No test runs yet</div>'; return; }
+      el.innerHTML = `<table>
+        <thead><tr><th>Timestamp</th><th>Suite</th><th>Status</th><th>Passed</th><th>Failed</th><th>Total</th><th>Duration</th></tr></thead>
+        <tbody>
+          ${d.runs.map(r => `<tr>
+            <td style="font-size:.78rem;color:var(--muted)">${new Date(r.timestamp).toLocaleString()}</td>
+            <td>${r.suite}</td>
+            <td><span class="badge badge-${r.status === 'passed' ? 'success' : 'failed'}">${r.status.toUpperCase()}</span></td>
+            <td style="color:var(--success)">${r.passed}</td>
+            <td style="color:var(--danger)">${r.failed}</td>
+            <td>${r.total}</td>
+            <td style="color:var(--muted)">${Math.round(r.duration_ms)}ms</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+    } catch(e) { console.error(e); }
+  }
+
+  // ── Init ───────────────────────────────────────────────────
+  // Render acceptance criteria table on load (empty state)
+  document.getElementById('acceptance-table').innerHTML = [
+    'All tests run without crash',
+    'Unit test pass rate ≥ 80%',
+    'No import/syntax errors',
+    'Test suite completes within 120s',
+    'Integration tests reach /health endpoint',
+  ].map(name => `<div class="acceptance-row"><span>${name}</span><span class="badge" style="background:var(--surface2);color:var(--muted)">PENDING</span></div>`).join('');
+
+  loadLog();
+  loadStats();
+  setInterval(loadLog, 15000);
+</script>
+</body>
+</html>
