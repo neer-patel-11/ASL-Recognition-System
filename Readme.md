@@ -1,6 +1,11 @@
 
 # ASL Recognition System with End-to-End MLOps Pipeline
 
+```
+Name :- Neer Patel
+Roll no :- DA25M021
+```
+
 ## Overview
 
 This project implements an end-to-end **American Sign Language (ASL) recognition system** that classifies hand gesture images into **27 classes (A–Z + NIL)**.
@@ -138,6 +143,38 @@ git clone https://github.com/neer-patel-11/ASL-Recognition-System
 cd ASL-Recognition-System
 ````
 
+
+
+### File: .env
+
+```
+KAGGLE_USERNAME=kaggle_usernmae
+KAGGLE_KEY=kaggle_key
+
+AIRFLOW_UID=50000
+AIRFLOW__CORE__EXECUTOR=LocalExecutor
+AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+AIRFLOW__CORE__FERNET_KEY=''
+AIRFLOW__CORE__LOAD_EXAMPLES=False
+AIRFLOW__WEBSERVER__SECRET_KEY=supersecretkey
+
+# SMTP — using Gmail as example (or any SMTP)
+AIRFLOW__SMTP__SMTP_HOST=smtp.gmail.com
+AIRFLOW__SMTP__SMTP_STARTTLS=True
+AIRFLOW__SMTP__SMTP_SSL=False
+AIRFLOW__SMTP__SMTP_USER=abc@gmail.com
+AIRFLOW__SMTP__SMTP_PASSWORD=password
+AIRFLOW__SMTP__SMTP_PORT=587
+AIRFLOW__SMTP__SMTP_MAIL_FROM=abc@gmail.com
+
+ALERT_EMAIL=abc@gmail.com
+
+
+ALERT_SENDER_EMAIL=abc@gmail.com
+ALERT_EMAIL_PASSWORD=password
+ALERT_RECIPIENT_EMAIL=abc@gmail.com
+
+```
 ---
 
 ### 2. Initialize DVC
@@ -286,17 +323,6 @@ POST /admin/tests/run
 
 ---
 
-## Future Work
+### THANK YOU
 
-* Use transfer learning (MobileNet / EfficientNet)
-* Improve dataset quality
-* Add real-time webcam inference
-* Deploy on cloud with auto-scaling
-* Improve drift detection
-
-
-## Author
-
-Neer Patel
-MTech MLOps Project
 
