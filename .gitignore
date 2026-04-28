@@ -13,3 +13,5 @@ models/mlp/mlp_best.pth
 **.pkl
 models/mlp/eval.json
 mlartifacts/
+Readme_commands.md
+todo.md

@@ -1,203 +1,302 @@
 
+# ASL Recognition System with End-to-End MLOps Pipeline
 
-<!-- https://www.kaggle.com/datasets/aishikai/asl-alphabets -->
+## Overview
 
+This project implements an end-to-end **American Sign Language (ASL) recognition system** that classifies hand gesture images into **27 classes (A–Z + NIL)**.
 
-https://www.kaggle.com/datasets/mayank0bhardwaj/alphabets
+It is designed as a complete **MLOps pipeline**, covering:
+- Data ingestion (Airflow)
+- Data & model versioning (DVC)
+- Training & experiment tracking (MLflow)
+- Model serving (FastAPI + MLflow)
+- Monitoring & alerting (Prometheus, Grafana, Alertmanager)
+
+---
+
+## Key Features
+
+- End-to-end reproducible ML pipeline
+- Automated data ingestion with Airflow
+- Experiment tracking with MLflow
+- Model versioning using DVC
+- Real-time inference API (FastAPI)
+- Monitoring with Prometheus & Grafana
+- Alerting via Alertmanager (email)
+- Docker-based deployment
+
+---
+
+## Project Structure
+
+```
 
 asl-recognition/
-├── dags/
+├── dags/                     # Airflow DAGs
 │   └── ingest_dag.py
-├── src/data/
-│   ├── download.py
-│   ├── validate.py
-│   ├── preprocess.py
-│   └── split.py
-├── logs/
+├── src/
+│   ├── data/                # Data pipeline scripts
+│   ├── features/            # Feature engineering
+│   ├── models/              # Model definitions
+│   ├── utils/               # Training utilities
+│   └── train.py             # Training entry point
+├── app/                     # FastAPI backend
+├── tests/                   # Unit & integration tests
 ├── data/
 │   ├── raw/
 │   └── processed/
+├── models/                  # Trained models
+├── monitoring/              # Prometheus + Alertmanager configs
+├── docker-compose.api.yml
 ├── docker-compose.airflow.yml
-├── .env
-└── requirements-airflow.txt
+├── dvc.yaml
+├── params.yaml
+└── README.md
 
+````
 
+---
 
+## Dataset
 
-# 1. Make sure your .env is filled in, then:
-sudo docker compose -f docker-compose.airflow.yml up airflow-init
+- Source: Kaggle
+- Dataset: `mayank0bhardwaj/alphabets`
+- Classes: 27 (A–Z + NIL)
 
-# 2. Start all services
-docker compose -f docker-compose.airflow.yml up -d
+---
 
-# 3. Open Airflow UI
-# → http://localhost:8080
-# → username: admin  password: admin
+## Model Performance
 
-# 4. Trigger the DAG manually from UI
-# 5. Check task logs in UI:
-# → DAGs → asl_data_ingestion → Graph → click any task → Logs
+### Best Model: Tiny-CNN
 
-# 6. To stop:
-docker compose -f docker-compose.airflow.yml down
+| Metric        | Value   |
+|--------------|--------|
+| Accuracy      | 35.46% |
+| Macro F1      | 0.3157 |
 
+### Per-Class F1 (Selected)
 
-docker compose down -v  # old command (if still exists)
-docker rm -f $(docker ps -aq)
-docker volume prune -f
+| Class | F1 Score |
+|------|--------|
+| Q    | 0.6667 |
+| C    | 0.6415 |
+| NIL  | 0.6000 |
+| P    | 0.5806 |
+| Z    | 0.5172 |
+| U    | 0.0000 |
 
+---
 
+## Tech Stack
 
+| Layer            | Tool |
+|------------------|-----|
+| API              | FastAPI |
+| Training         | PyTorch |
+| Tracking         | MLflow |
+| Orchestration    | Airflow |
+| Versioning       | DVC |
+| Monitoring       | Prometheus |
+| Visualization    | Grafana |
+| Alerting         | Alertmanager |
+| Containerization | Docker |
 
+---
 
-## DVC
+## Pipeline Overview
 
-# Run from your project root  e.g. ASL-Recognition-System/
-cd /media/neer/1E9C598B9C595DF92/Mtech/sem_2/MLops/project/ASL-Recognition-System
+### Data Pipeline (Airflow)
+1. Download dataset
+2. Validate images
+3. Split dataset (70/15/15)
+4. Compute baseline stats
+5. Track with DVC
+6. Send email report
 
-# If git not initialized yet:
-git init
-git add .
-git commit -m "initial commit"
+### Training Pipeline (DVC)
+- Feature extraction
+- Train models:
+  - CNN (best)
+  - MLP
+  - KNN / Random Forest
+- Store metrics and artifacts
 
-# Initialize DVC
+### Serving Pipeline
+- FastAPI receives image
+- Preprocessing (resize, normalize)
+- Calls MLflow model server
+- Returns prediction
+
+---
+
+## Setup Instructions
+
+### 1. Clone Repository
+
+```bash
+git clone https://github.com/neer-patel-11/ASL-Recognition-System
+cd ASL-Recognition-System
+````
+
+---
+
+### 2. Initialize DVC
+
+```bash
 dvc init
-
-# This creates: .dvc/  .dvcignore
-# Commit these immediately
 git add .dvc .dvcignore
-git commit -m "dvc: initialize"
+git commit -m "dvc init"
 
-
-
-# This is where DVC stores the actual data files (like a local S3)
-mkdir -p /media/neer/1E9C598B9C595DF92/Mtech/sem_2/MLops/dvc-store
-
-# Add it as the default remote
-dvc remote add -d localstore /media/neer/1E9C598B9C595DF92/Mtech/sem_2/MLops/dvc-store
-
-# Verify
-dvc remote list
-# Should print:  localstore    /media/...
-
+dvc remote add -d localstore /path/to/dvc-store
 git add .dvc/config
-git commit -m "dvc: add local remote storage"
+git commit -m "add dvc remote"
+```
 
-mkdir -p data/raw data/processed config logs dags src/data
+---
 
+### 3. Start Airflow
 
+```bash
+sudo docker compose -f docker-compose.airflow.yml up airflow-init
+sudo docker compose -f docker-compose.airflow.yml up -d
+```
 
-# From project root on your HOST machine:
+Access UI:
 
-# Add the generated data files to DVC tracking
-dvc add data/raw
-dvc add data/processed
+```
+http://localhost:8080
+username: admin
+password: admin
+```
 
-# Push data to local DVC store
-dvc push
+Trigger DAG:
 
-# Commit the .dvc pointer files to Git
-git add data/raw.dvc data/processed.dvc data/.gitignore
-git commit -m "dvc: track raw and processed data after first pipeline run"
+```
+asl_data_ingestion
+```
 
+---
 
+### 4. Run DVC Pipeline
 
+```bash
+dvc repro
+```
 
-Docker up and runing 
+---
 
-sudo chown -R 50000:50000 logs
-chmod -R 755 logs
+### 5. Start MLflow Model Server
 
-sudo chown -R 50000:50000 data
-chmod -R 755 data
-
-
-docker compose -f docker-compose.airflow.yml up airflow-init
-
-# 5. Start services (after init exits cleanly)
-sudo docker compose -f docker-compose.airflow.yml up -d airflow-webserver airflow-scheduler postgres
-
-# 6. Wait ~20 seconds, then check everything is healthy
-docker compose -f docker-compose.airflow.yml ps
-# All three should show "running" or "healthy"
-
-# 7. Now trigger the DAG
-docker compose -f docker-compose.airflow.yml exec airflow-scheduler airflow dags trigger asl_data_ingestion
-
-
-
-## Every time after (e.g. next day, after reboot)
-
-# 1. Start services (skip init — already done)
-docker compose -f docker-compose.airflow.yml up -d airflow-webserver airflow-scheduler postgres
-
-# 2. Wait ~15 seconds for scheduler to come up, then trigger
-docker compose -f docker-compose.airflow.yml exec airflow-scheduler \
-  airflow dags trigger asl_data_ingestion
-
-
-If you changed params.yaml and want to retrigger
-
-# Services already running — just trigger directly
-docker compose -f docker-compose.airflow.yml exec airflow-scheduler \
-  airflow dags trigger asl_data_ingestion
-# Guard task will detect the params hash changed and run automatically
-
-
-Stopping everything cleanly
-# Stop but keep data (postgres volume preserved)
-docker compose -f docker-compose.airflow.yml down
-
-# Stop AND wipe everything including DB (use only if you want a clean slate)
-docker compose -f docker-compose.airflow.yml down -v
-# Note: if you run down -v you must redo step 4 (airflow-init) next time
-
-
-
-
-## re run after config change for extracting dataset 
-# Trigger the DAG
-docker compose -f docker-compose.airflow.yml exec airflow-scheduler \
-  airflow dags trigger asl_data_ingestion
-
-
-
-
-
-
-MLflow Projects   → how to RUN the project (entry points, env, portability)
-DVC               → how to REPRODUCE it    (caching, data versioning, DAG)
-MLflow Tracking   → how to LOG it          (metrics, params, artifacts)
-
-
-
-
+```bash
 PYTHONPATH=src mlflow models serve \
-  -m "mlartifacts/1/models/m-b0ff9d9a6c6846ceab16e575b05a6f92/artifacts" \
+  -m "mlartifacts/1/models/<model-id>/artifacts" \
   --host 0.0.0.0 \
   --port 5001 \
   --env-manager local
+```
 
-PYTHONPATH=src mlflow models serve \
-  -m "mlartifacts/1/models/m-94ca8303e5b94c9fbe149e2440684de5/artifacts" \
-  --host 0.0.0.0 \
-  --port 5001 \
-  --env-manager local
+---
 
-  
+### 6. Start API + Monitoring
 
-
-PYTHONPATH=src mlflow models serve \
-  -m "mlartifacts/1/models/<Model - id>/artifacts" \
-  --host 0.0.0.0 \
-  --port 5001 \
-  --env-manager local
-
-
-
-
-Fastapi App
-
+```bash
 sudo docker compose -f docker-compose.api.yml up --build
+```
 
-sudo docker exec -it b0a96bef3736 env | grep ALERT
+---
+
+## Services
+
+| Service    | URL                                                        |
+| ---------- | ---------------------------------------------------------- |
+| API        | [http://localhost:8000](http://localhost:8000)             |
+| Admin      | [http://localhost:8000/admin](http://localhost:8000/admin) |
+| Grafana    | [http://localhost:3000](http://localhost:3000)             |
+| Prometheus | [http://localhost:9090](http://localhost:9090)             |
+| Airflow    | [http://localhost:8080](http://localhost:8080)             |
+| MLflow     | [http://localhost:5000](http://localhost:5000)             |
+
+---
+
+## API Usage
+
+### Predict Endpoint
+
+**POST /predict**
+
+Input:
+
+* Multipart form-data
+* Field: `file` (image)
+
+Output:
+
+```json
+{
+  "label": "C",
+  "confidence": 0.82,
+  "latency_ms": 148.3
+}
+```
+
+---
+
+## Monitoring
+
+### Metrics
+
+* prediction_requests_total
+* prediction_errors_total
+* prediction_latency_seconds
+* model_drift_score
+
+### Alerts
+
+* High error rate (>5%)
+* High latency (p99 > 2s)
+* Data drift (PSI > 0.3)
+* Service down
+* High CPU / memory usage
+
+---
+
+## Testing
+
+Run tests:
+
+```bash
+pytest tests/
+```
+
+Or via API:
+
+```
+POST /admin/tests/run
+```
+
+---
+
+## Known Limitations
+
+* Landmark-based models perform poorly (~5% accuracy)
+* CNN accuracy limited due to dataset quality
+* Class imbalance affects performance
+* No real-time video support
+* No cloud deployment
+
+---
+
+## Future Work
+
+* Use transfer learning (MobileNet / EfficientNet)
+* Improve dataset quality
+* Add real-time webcam inference
+* Deploy on cloud with auto-scaling
+* Improve drift detection
+
+
+## Author
+
+Neer Patel
+MTech MLOps Project
+
