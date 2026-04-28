@@ -1,0 +1,23 @@
+For this project, I used ChatGPT , Claude as a tool to assist primarily with syntax-related queries and implementation details. The usage was limited to improving coding efficiency and resolving small technical doubts.
+
+Prompts used include:
+
+“Give me syntax for FastAPI endpoint”
+“How to use requests package for making local API call”
+“Exception syntax using assert”
+“Help me append in a JSON array”
+“Syntax for loading YAML file”
+“How to write an Airflow DAG for data ingestion”
+“Airflow task dependencies syntax”
+“Prometheus alert rule syntax example”
+“Alertmanager email configuration using SMTP”
+“How to expose custom metrics in Prometheus”
+“DVC pipeline stage syntax (dvc.yaml)”
+“How to run DVC repro and track data”
+“Docker Compose command to run multiple services”
+“Dockerfile best practices for FastAPI”
+“Basic HTML form for file upload”
+“Simple CSS styling for web UI”
+“SMTP configuration using Gmail in Python”
+
+AI assistance was not used for core logic, system design, or decision-making. All architectural choices, pipeline design, model implementation, and integration were developed independently.
