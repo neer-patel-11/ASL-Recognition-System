@@ -12,8 +12,8 @@ from PIL import Image
 
 # ── Set env vars BEFORE importing app so they are picked up ──
 os.environ.setdefault("ADMIN_USERNAME", "admin")
-os.environ.setdefault("ADMIN_PASSWORD", "admin123")
-os.environ.setdefault("MLFLOW_TRACKING_URI", "http://localhost:5000")
+os.environ.setdefault("ADMIN_PASSWORD", "admin")
+os.environ.setdefault("MLFLOW_TRACKING_URI", "http://host.docker.internal:5000")
 
 
 @pytest.fixture(scope="session")
@@ -26,7 +26,9 @@ def client():
 @pytest.fixture()
 def admin_auth():
     """HTTP Basic credentials for the admin user."""
-    return ("admin", "asl_admin_2024")
+    return ("admin", "admin")
+    # return ("admin", "admin1")
+
 
 
 @pytest.fixture()

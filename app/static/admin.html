@@ -205,7 +205,7 @@
     <a href="/">← Back to App</a>
     <a href="/admin/pipeline" class="active">Pipeline</a>
     <a href="/docs">API Docs</a>
-    <a href="/metrics">Metrics</a>
+    <!-- <a href="/metrics">Metrics</a> -->
   </div>
 </nav>
 
@@ -300,8 +300,8 @@
       <div class="card-title" style="margin-bottom:1rem">🚀 Run Test Suite</div>
       <div class="run-suite-row">
         <button class="btn btn-success" onclick="runTests('all')" id="btn-all">▶ Run All Tests</button>
-        <button class="btn btn-primary" onclick="runTests('unit')" id="btn-unit">▶ Unit Tests</button>
-        <button class="btn btn-outline" onclick="runTests('integration')" id="btn-int">▶ Integration Tests</button>
+        <!-- <button class="btn btn-primary" onclick="runTests('unit')" id="btn-unit">▶ Unit Tests</button> -->
+        <!-- <button class="btn btn-outline" onclick="runTests('integration')" id="btn-int">▶ Integration Tests</button> -->
         <button class="btn btn-outline btn-sm" onclick="loadTestHistory()">📋 Load History</button>
       </div>
 
@@ -322,7 +322,7 @@
             Suite: <strong id="tr-suite" style="color:var(--accent)">—</strong> &nbsp;|&nbsp;
             Status: <strong id="tr-status">—</strong>
           </div>
-          <button class="btn btn-outline btn-sm" onclick="document.getElementById('stdout-wrap').style.display = document.getElementById('stdout-wrap').style.display==='none'?'block':'none'">Toggle Output</button>
+          <!-- <button class="btn btn-outline btn-sm" onclick="document.getElementById('stdout-wrap').style.display = document.getElementById('stdout-wrap').style.display==='none'?'block':'none'">Toggle Output</button> -->
         </div>
         <div id="test-cases-list" style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem"></div>
         <div id="stdout-wrap" style="display:none">

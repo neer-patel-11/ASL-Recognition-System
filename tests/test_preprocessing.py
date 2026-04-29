@@ -173,4 +173,4 @@ def test_admin_env_vars():
     """ADMIN_USERNAME and ADMIN_PASSWORD env vars must be respected."""
     import os  # noqa: PLC0415
     assert os.environ.get("ADMIN_USERNAME") == "admin"
-    assert os.environ.get("ADMIN_PASSWORD") == "asl_admin_2024"
+    assert os.environ.get("ADMIN_PASSWORD") == "admin"

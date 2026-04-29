@@ -36,10 +36,10 @@ logger = logging.getLogger("asl_api")
 
 # ── Admin credentials (change via env vars in production) ─────────────────────
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "asl_admin_2024")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin")
 
 # ── MLflow config ─────────────────────────────────────────────────────────────
-MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
+MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", "http://host.docker.internal:5000")
 MLFLOW_INVOCATION_URL = os.getenv("MLFLOW_URL", "http://host.docker.internal:5001/invocations")
 BASELINE_MEAN = 0.45
 
@@ -193,8 +193,8 @@ async def predict(file: UploadFile = File(...)):
                 label = preds[0]
                 result["predictions"] = [{label: 1.0}]
                 
-        print("Getting result")
-        print(result)
+        # print("Getting result")
+        # print(result)
         elapsed_ms = (time.time() - start) * 1000
         logger.info("Prediction success: latency=%.1fms drift_psi=%.4f", elapsed_ms, psi)
         _log_pipeline_event("inference", "success", f"file={file.filename}", elapsed_ms)
@@ -227,6 +227,8 @@ def list_experiments(_: str = Depends(require_admin)):
     """List all MLflow experiments with run summary."""
     try:
         client = _mlflow_client()
+        # print("Got the client")
+        # print(client)
         experiments = client.search_experiments()
         result = []
         for exp in experiments:
@@ -235,6 +237,8 @@ def list_experiments(_: str = Depends(require_admin)):
                 max_results=5,
                 order_by=["start_time DESC"],
             )
+            # print("runs ")
+            # print(runs)
             result.append(
                 {
                     "experiment_id": exp.experiment_id,
@@ -255,6 +259,8 @@ def list_experiments(_: str = Depends(require_admin)):
                     ],
                 }
             )
+        print("printing the result")
+        print(result)
         return {"experiments": result, "total": len(result)}
     except Exception as exc:
         logger.error("MLflow experiments fetch failed: %s", exc)
@@ -297,7 +303,10 @@ def get_model_metrics(_: str = Depends(require_admin)):
     """Aggregate metrics from local JSON files (works offline)."""
     metrics_root = Path("models")
     all_metrics = []
+    print("metrics")
+    print(all_metrics)
     for json_file in sorted(metrics_root.glob("**/*_metrics.json")):
+        print("there is a file")
         try:
             with open(json_file) as f:
                 data = json.load(f)
@@ -397,7 +406,8 @@ def run_tests(
                 report_data = json.load(f)
         except Exception:
             pass
-
+        print("Got the report data")
+        print(result)
         summary = report_data.get("summary", {})
         passed = summary.get("passed", 0)
         failed = summary.get("failed", 0)

@@ -8,4 +8,6 @@ prometheus-fastapi-instrumentator==6.1.0
 prometheus-client
 scipy==1.12.0
 pytest
+pytest-json-report
 mlflow
+httpx
