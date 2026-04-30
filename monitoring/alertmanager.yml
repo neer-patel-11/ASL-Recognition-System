@@ -1,8 +1,8 @@
 global:
   smtp_smarthost: "smtp.gmail.com:587"
-  smtp_from: '${ALERT_SENDER_EMAIL}'
-  smtp_auth_username: '${ALERT_SENDER_EMAIL}'
-  smtp_auth_password: '${ALERT_EMAIL_PASSWORD}'
+  smtp_from: 'neer.patel.152@gmail.com'
+  smtp_auth_username: 'neer.patel.152@gmail.com'
+  smtp_auth_password: 'nptszwikeeaytfhp'
   smtp_require_tls: true
 
 route:
@@ -24,7 +24,7 @@ route:
 receivers:
   - name: email_team
     email_configs:
-      - to: '${ALERT_RECIPIENT_EMAIL}'
+      - to: 'patelneer403@gmail.com'
         send_resolved: true
         headers:
           Subject: "[{{ .Status | toUpper }}] {{ .CommonAnnotations.summary }}"

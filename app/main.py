@@ -167,6 +167,13 @@ def ready():
     return {"status": "ready", "model_url": MLFLOW_INVOCATION_URL}
 
 
+@app.get("/user_manual")
+def ready():
+    return FileResponse(str(STATIC_DIR / "user_manual.html"))
+    
+
+
+
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
     """Run ASL sign inference on an uploaded image."""
